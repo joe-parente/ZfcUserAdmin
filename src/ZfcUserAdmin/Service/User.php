@@ -13,9 +13,7 @@ use ZfcUserAdmin\Options\ModuleOptions;
 use ZfcUser\Mapper\UserInterface as UserMapperInterface;
 use ZfcUser\Options\ModuleOptions as ZfcUserModuleOptions;
 
-
-class User extends EventProvider implements ServiceManagerAwareInterface
-{
+class User extends EventProvider implements ServiceManagerAwareInterface {
 
     /**
      * @var UserMapperInterface
@@ -37,14 +35,12 @@ class User extends EventProvider implements ServiceManagerAwareInterface
      */
     protected $zfcUserOptions;
 
-
     /**
      * @param Form $form
      * @param array $data
      * @return UserInterface|null
      */
-    public function create(Form $form, array $data)
-    {
+    public function create(Form $form, array $data) {
         $zfcUserOptions = $this->getZfcUserOptions();
         $user = $form->getData();
 
@@ -75,15 +71,14 @@ class User extends EventProvider implements ServiceManagerAwareInterface
      * @param UserInterface $user
      * @return UserInterface
      */
-    public function edit(Form $form, array $data, UserInterface $user)
-    {
-        // first, process all form fields
-        foreach ($data as $key => $value) {
-            if ($key == 'password') continue;
-
-            $setter = $this->getAccessorName($key);
-            if (method_exists($user, $setter)) call_user_func(array($user, $setter), $value);
-        }
+    public function edit(Form $form, array $data, UserInterface $user) {
+//        // first, process all form fields
+//        foreach ($data as $key => $value) {
+//            if ($key == 'password') continue;
+//
+//            $setter = $this->getAccessorName($key);
+//            if (method_exists($user, $setter)) call_user_func(array($user, $setter), $value);
+//        }
 
         $argv = array();
         // then check if admin wants to change user password
@@ -101,12 +96,22 @@ class User extends EventProvider implements ServiceManagerAwareInterface
             }
         }
 
-        // TODO: not sure if this code is required here - all fields that came from the form already saved
-        foreach ($this->getOptions()->getEditFormElements() as $element) {
-            call_user_func(array($user, $this->getAccessorName($element)), $data[$element]);
+//        // TODO: not sure if this code is required here - all fields that came from the form already saved
+//        foreach ($this->getOptions()->getEditFormElements() as $element) {
+//            call_user_func(array($user, $this->getAccessorName($element)), $data[$element]);
+//        }
+        //$sm = $e->getTarget()->getServiceManager();
+        $sm = $this->getServiceManager();
+        $em = $sm->get('doctrine.entitymanager.orm_default');
+        $oldRole = $user->getRoles();
+        foreach ($oldRole as $role) {
+            $user->removeRole($role);
         }
-
+        $criteria = array('id' => $data['roles']['0']);
+        $userRole = $em->getRepository('Application\Entity\Role')->findOneBy($criteria);
+        $user->addRole($userRole);
         $argv += array('user' => $user, 'form' => $form, 'data' => $data);
+
         $this->getEventManager()->trigger(__FUNCTION__, $this, $argv);
         $this->getUserMapper()->update($user);
         $this->getEventManager()->trigger(__FUNCTION__ . '.post', $this, $argv);
@@ -116,13 +121,11 @@ class User extends EventProvider implements ServiceManagerAwareInterface
     /**
      * @return string
      */
-    public function generatePassword()
-    {
+    public function generatePassword() {
         return Rand::getString($this->getOptions()->getAutoPasswordLength());
     }
 
-    protected function getAccessorName($property, $set = true)
-    {
+    protected function getAccessorName($property, $set = true) {
         $parts = explode('_', $property);
         array_walk($parts, function (&$val) {
             $val = ucfirst($val);
@@ -130,36 +133,31 @@ class User extends EventProvider implements ServiceManagerAwareInterface
         return (($set ? 'set' : 'get') . implode('', $parts));
     }
 
-    public function getUserMapper()
-    {
+    public function getUserMapper() {
         if (null === $this->userMapper) {
             $this->userMapper = $this->getServiceManager()->get('zfcuser_user_mapper');
         }
         return $this->userMapper;
     }
 
-    public function setUserMapper(UserMapperInterface $userMapper)
-    {
+    public function setUserMapper(UserMapperInterface $userMapper) {
         $this->userMapper = $userMapper;
         return $this;
     }
 
-    public function setOptions(ModuleOptions $options)
-    {
+    public function setOptions(ModuleOptions $options) {
         $this->options = $options;
         return $this;
     }
 
-    public function getOptions()
-    {
+    public function getOptions() {
         if (!$this->options instanceof ModuleOptions) {
             $this->setOptions($this->getServiceManager()->get('zfcuseradmin_module_options'));
         }
         return $this->options;
     }
 
-    public function setZfcUserOptions(ZfcUserModuleOptions $options)
-    {
+    public function setZfcUserOptions(ZfcUserModuleOptions $options) {
         $this->zfcUserOptions = $options;
         return $this;
     }
@@ -167,8 +165,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface
     /**
      * @return \ZfcUser\Options\ModuleOptions
      */
-    public function getZfcUserOptions()
-    {
+    public function getZfcUserOptions() {
         if (!$this->zfcUserOptions instanceof ZfcUserModuleOptions) {
             $this->setZfcUserOptions($this->getServiceManager()->get('zfcuser_module_options'));
         }
@@ -180,8 +177,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface
      *
      * @return ServiceManager
      */
-    public function getServiceManager()
-    {
+    public function getServiceManager() {
         return $this->serviceManager;
     }
 
@@ -191,9 +187,9 @@ class User extends EventProvider implements ServiceManagerAwareInterface
      * @param ServiceManager $serviceManager
      * @return User
      */
-    public function setServiceManager(ServiceManager $serviceManager)
-    {
+    public function setServiceManager(ServiceManager $serviceManager) {
         $this->serviceManager = $serviceManager;
         return $this;
     }
+
 }
