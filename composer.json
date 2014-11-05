@@ -1,19 +1,19 @@
 {
-    "name": "danielss89/zfc-user-admin",
+    "name": "joe-parente/zfc-user-admin",
     "description": "An administration interface for ZfcUser.",
     "type": "library",
     "keywords": [
         "zf2"
     ],
-    "homepage": "https://github.com/Danielss89/ZfcUserAdmin.git",
+    "homepage": "https://github.com/joe-parente/ZfcUserAdmin.git",
     "authors": [
         {
-            "name": "Daniel Strøm",
-            "email": "daniel@eye4web.dk"
+            "name": "Joe Parente",
+            "email": "joe@joeparente.com"
         }
     ],
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=5.5.0",
         "zf-commons/zfc-user": ">=0.1.1",
         "zf-commons/zfc-admin": ">=0.1.1"
     },
