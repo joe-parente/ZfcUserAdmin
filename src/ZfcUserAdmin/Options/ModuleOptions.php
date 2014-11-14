@@ -35,6 +35,14 @@ class ModuleOptions extends AbstractOptions implements
      */
     protected $createFormElements = array();
 
+        /**
+     * Admins allowed to set password to random?
+     * true = displays resert password to random
+     * false = doesn't 
+     */
+    protected $adminRandomPassword = array();
+
+    
     /**
      * @var bool
      * true = create password automaticly
@@ -56,6 +64,13 @@ class ModuleOptions extends AbstractOptions implements
 
     protected $userMapper = 'ZfcUserAdmin\Mapper\UserDoctrine';
 
+    public function setAdminRandomPassword($adminrandompassord) {
+        $this->adminRandomPassword = $adminrandompassord;
+    }
+    public function getAdminRandomPassword() {
+        return $this->adminRandomPassword;
+    }
+    
     public function setUserMapper($userMapper)
     {
         $this->userMapper = $userMapper;
@@ -111,7 +126,7 @@ class ModuleOptions extends AbstractOptions implements
         return $this->allowPasswordChange;
     }
 
-    public function setAdminPasswordChange($allowPasswordChange)
+    public function setAllowPasswordChange($allowPasswordChange)
     {
         $this->allowPasswordChange = $allowPasswordChange;
     }

@@ -26,7 +26,7 @@ class EditUser extends Register
 
         $this->remove('captcha');
 
-        if ($this->userEditOptions->getAllowPasswordChange()) {
+        if ($this->userEditOptions->getAdminRandomPassword()) {
             $this->add(array(
                 'name' => 'reset_password',
                 'type' => 'Zend\Form\Element\Checkbox',
@@ -34,12 +34,13 @@ class EditUser extends Register
                     'label' => 'Reset password to random',
                 ),
             ));
-
+        }
+        if ($this->userEditOptions->getAllowPasswordChange()) {
             $password = $this->get('password');
             $password->setAttribute('required', false);
-            $password->setOptions(array('label' => 'Password (only if want to change)'));
+            $password->setOptions(array('label' => 'Password (only if you want to change)'));
 
-            $this->remove('passwordVerify');
+            // $this->remove('passwordVerify');
         } else {
             $this->remove('password')->remove('passwordVerify');
         }

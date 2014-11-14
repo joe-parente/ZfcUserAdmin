@@ -10,5 +10,5 @@ interface UserEditOptionsInterface
 
     public function getAllowPasswordChange();
 
-    public function setAdminPasswordChange($allowPasswordChange);
+    public function setAllowPasswordChange($allowPasswordChange);
 }
