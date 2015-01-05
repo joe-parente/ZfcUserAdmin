@@ -40,7 +40,7 @@ class EditUser extends Register {
         if ($this->userEditOptions->getAllowPasswordChange()) {
             $password = $this->get('password');
             $password->setAttribute('required', false);
-            $password->setOptions(array('label' => 'Password (only if you want to change)'));
+            $password->setOptions(array('label' => 'Password (Enter only if you want to change)'));
 
             // $this->remove('passwordVerify');
         } else {
@@ -71,13 +71,13 @@ class EditUser extends Register {
                         'object_manager' => $objectManager,
                         'target_class' => 'Application\Entity\Client',
                         'property' => 'name',
-                        'is_method' => true,
-                        'find_method' => array(
-                            'name' => 'clientsByUser',
-                            'params' => array(
-                                'criteria' => array('id'),
-                            ),
-                        )
+//                        'is_method' => true,
+//                        'find_method' => array(
+//                            'name' => 'clientsByUser',
+//                            'params' => array(
+//                                'criteria' => array('id' => $parent),
+//                            ),
+//                        )
                     )
         ));
         foreach ($this->getUserEditOptions()->getEditFormElements() as $name => $element) {
