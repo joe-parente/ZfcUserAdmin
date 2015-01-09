@@ -103,8 +103,6 @@ class UserAdminController extends AbstractActionController
     public function removeAction()
     {
         $userId = $this->getEvent()->getRouteMatch()->getParam('userId');
-
-        /** @var $identity \ZfcUser\Entity\UserInterface */
         $identity = $this->zfcUserAuthentication()->getIdentity();
         if ($identity && $identity->getId() == $userId) {
             $this->flashMessenger()->addErrorMessage('You can not delete yourself');

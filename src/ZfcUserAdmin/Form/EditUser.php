@@ -80,6 +80,27 @@ class EditUser extends Register {
 //                        )
                     )
         ));
+//                $this->add(
+//                array(
+//                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+//                    'name' => 'dapartments',
+//                    'attributes' => array(
+//                        'multiple' => false,
+//                    ),
+//                    'options' => array(
+//                        'object_manager' => $objectManager,
+//                        'target_class' => 'Application\Entity\Client',
+//                        'property' => 'name',
+////                        'is_method' => true,
+////                        'find_method' => array(
+////                            'name' => 'clientsByUser',
+////                            'params' => array(
+////                                'criteria' => array('id' => $parent),
+////                            ),
+////                        )
+//                    )
+//        ));
+                
         foreach ($this->getUserEditOptions()->getEditFormElements() as $name => $element) {
             // avoid adding fields twice (e.g. email)
             //if ($this->get($element)) continue;
