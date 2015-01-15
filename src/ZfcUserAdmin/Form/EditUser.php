@@ -70,7 +70,7 @@ class EditUser extends Register {
                     'options' => array(
                         'object_manager' => $objectManager,
                         'target_class' => 'Application\Entity\Client',
-                        'property' => 'name',
+                        'property' => 'id',
 //                        'is_method' => true,
 //                        'find_method' => array(
 //                            'name' => 'clientsByUser',
