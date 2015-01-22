@@ -71,13 +71,14 @@ class EditUser extends Register {
                         'object_manager' => $objectManager,
                         'target_class' => 'Application\Entity\Client',
                         'property' => 'id',
-//                        'is_method' => true,
-//                        'find_method' => array(
-//                            'name' => 'clientsByUser',
-//                            'params' => array(
-//                                'criteria' => array('id' => $parent),
-//                            ),
-//                        )
+                        'is_method' => true,
+                        'find_method' => array(
+                            'name' => 'findBy',
+                            'params' => array(
+                                'criteria' => array(),
+                                'orderBy' => ['id' => 'asc']
+                            ),
+                        )
                     )
         ));
 //                $this->add(
