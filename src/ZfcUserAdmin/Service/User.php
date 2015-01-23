@@ -91,7 +91,9 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
 //            $setter = $this->getAccessorName($key);
 //            if (method_exists($user, $setter)) call_user_func(array($user, $setter), $value);
 //        }
-
+        if (is_array($data['parentclientid'])) {
+            $data['parentclientid'] = $data['parentclientid']['id'];
+        }
         $argv = array();
         // then check if admin wants to change user password
         if ($this->getOptions()->getAllowPasswordChange()) {
@@ -113,6 +115,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
 //            call_user_func(array($user, $this->getAccessorName($element)), $data[$element]);
 //        }
         //$sm = $e->getTarget()->getServiceManager();
+        
         $sm = $this->getServiceManager();
         $em = $sm->get('doctrine.entitymanager.orm_default');
 //        $oldRole = $user->getRoles();
@@ -122,6 +125,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         $criteria = array('id' => $data['roles']['0']);
         $userRole = $em->getRepository('Application\Entity\Role')->findOneBy($criteria);
         $user->addRole($userRole);
+        $user->setParentClientId($data['parentclientid']);
         $argv += array('user' => $user, 'form' => $form, 'data' => $data);
 
 //        $user->removeClients();
