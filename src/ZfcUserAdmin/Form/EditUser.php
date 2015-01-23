@@ -60,27 +60,41 @@ class EditUser extends Register {
                     )
                 )
         );
-        $this->add(
-                array(
-                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',
-                    'name' => 'clients',
-                    'attributes' => array(
-                        'multiple' => true,
-                    ),
-                    'options' => array(
-                        'object_manager' => $objectManager,
-                        'target_class' => 'Application\Entity\Client',
-                        'property' => 'id',
-                        'is_method' => true,
-                        'find_method' => array(
-                            'name' => 'findBy',
-                            'params' => array(
-                                'criteria' => array(),
-                                'orderBy' => ['id' => 'asc']
-                            ),
-                        )
-                    )
+        $this->add(array(
+            'name' => 'parentclientid',
+            'type' => 'Application\Form\Element\DtgAutocompleteElement',
+            'options' => array(
+                'label' => 'Parent Client',
+                'sm' => $serviceManager, // don't forget to send Service Manager
+                'property' => 'parentclientid',
+                'width' => '20',
+            ),
+            'attributes' => array(
+                'required' => true,
+                'class' => 'form-control input-sm'
+            )
         ));
+//        $this->add(
+//                array(
+//                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+//                    'name' => 'clients',
+//                    'attributes' => array(
+//                        'multiple' => true,
+//                    ),
+//                    'options' => array(
+//                        'object_manager' => $objectManager,
+//                        'target_class' => 'Application\Entity\Client',
+//                        'property' => 'id',
+//                        'is_method' => true,
+//                        'find_method' => array(
+//                            'name' => 'findBy',
+//                            'params' => array(
+//                                'criteria' => array(),
+//                                'orderBy' => ['id' => 'asc']
+//                            ),
+//                        )
+//                    )
+//        ));
 //                $this->add(
 //                array(
 //                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',
@@ -101,7 +115,7 @@ class EditUser extends Register {
 ////                        )
 //                    )
 //        ));
-                
+
         foreach ($this->getUserEditOptions()->getEditFormElements() as $name => $element) {
             // avoid adding fields twice (e.g. email)
             //if ($this->get($element)) continue;
