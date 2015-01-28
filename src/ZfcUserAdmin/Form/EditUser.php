@@ -67,11 +67,12 @@ class EditUser extends Register {
                 'label' => 'Parent Client',
                 'sm' => $serviceManager, // don't forget to send Service Manager
                 'property' => 'parentclientid',
-                'width' => '20',
+                
             ),
             'attributes' => array(
                 'required' => true,
-                'class' => 'form-control input-sm'
+                'class' => 'form-control input-sm',
+                'style' => 'width: 150px',
             )
         ));
 //        $this->add(
@@ -95,6 +96,7 @@ class EditUser extends Register {
 //                        )
 //                    )
 //        ));
+        
 //                $this->add(
 //                array(
 //                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',
@@ -106,13 +108,13 @@ class EditUser extends Register {
 //                        'object_manager' => $objectManager,
 //                        'target_class' => 'Application\Entity\Client',
 //                        'property' => 'name',
-////                        'is_method' => true,
-////                        'find_method' => array(
-////                            'name' => 'clientsByUser',
-////                            'params' => array(
-////                                'criteria' => array('id' => $parent),
-////                            ),
-////                        )
+//                        'is_method' => true,
+//                        'find_method' => array(
+//                            'name' => 'clientsByUser',
+//                            'params' => array(
+//                                'criteria' => array('id' => $parent),
+//                            ),
+//                        )
 //                    )
 //        ));
 

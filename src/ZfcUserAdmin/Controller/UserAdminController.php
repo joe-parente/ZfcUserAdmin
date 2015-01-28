@@ -9,17 +9,17 @@ use ZfcUser\Mapper\UserInterface;
 use ZfcUser\Options\ModuleOptions as ZfcUserModuleOptions;
 use ZfcUserAdmin\Options\ModuleOptions;
 
-class UserAdminController extends AbstractActionController
-{
+class UserAdminController extends AbstractActionController {
+
     protected $options, $userMapper;
     protected $zfcUserOptions;
+
     /**
      * @var \ZfcUserAdmin\Service\User
      */
     protected $adminUserService;
 
-    public function listAction()
-    {
+    public function listAction() {
         $userMapper = $this->getUserMapper();
         $users = $userMapper->findAll();
         if (is_array($users)) {
@@ -36,8 +36,7 @@ class UserAdminController extends AbstractActionController
         );
     }
 
-    public function createAction()
-    {
+    public function createAction() {
         /** @var $form \ZfcUserAdmin\Form\CreateUser */
         $form = $this->getServiceLocator()->get('zfcuseradmin_createuser_form');
         $request = $this->getRequest();
@@ -54,7 +53,7 @@ class UserAdminController extends AbstractActionController
             $form->setData($request->getPost());
 
             if ($form->isValid()) {
-                $user = $this->getAdminUserService()->create($form, (array)$request->getPost());
+                $user = $this->getAdminUserService()->create($form, (array) $request->getPost());
                 if ($user) {
                     $this->flashMessenger()->addSuccessMessage('The user was created');
                     return $this->redirect()->toRoute('zfcadmin/zfcuseradmin/list');
@@ -67,8 +66,7 @@ class UserAdminController extends AbstractActionController
         );
     }
 
-    public function editAction()
-    {
+    public function editAction() {
         $userId = $this->getEvent()->getRouteMatch()->getParam('userId');
         $user = $this->getUserMapper()->findById($userId);
 
@@ -84,7 +82,7 @@ class UserAdminController extends AbstractActionController
             $form->setData($request->getPost());
             $tester = $user->getRoles();
             if ($form->isValid()) {
-                $user = $this->getAdminUserService()->edit($form, (array)$request->getPost(), $user);
+                $user = $this->getAdminUserService()->edit($form, (array) $request->getPost(), $user);
                 if ($user) {
                     $this->flashMessenger()->addSuccessMessage('The user was edited');
                     return $this->redirect()->toRoute('zfcadmin/zfcuseradmin/list');
@@ -100,8 +98,7 @@ class UserAdminController extends AbstractActionController
         );
     }
 
-    public function removeAction()
-    {
+    public function removeAction() {
         $userId = $this->getEvent()->getRouteMatch()->getParam('userId');
         $identity = $this->zfcUserAuthentication()->getIdentity();
         if ($identity && $identity->getId() == $userId) {
@@ -117,50 +114,43 @@ class UserAdminController extends AbstractActionController
         return $this->redirect()->toRoute('zfcadmin/zfcuseradmin/list');
     }
 
-    public function setOptions(ModuleOptions $options)
-    {
+    public function setOptions(ModuleOptions $options) {
         $this->options = $options;
         return $this;
     }
 
-    public function getOptions()
-    {
+    public function getOptions() {
         if (!$this->options instanceof ModuleOptions) {
             $this->setOptions($this->getServiceLocator()->get('zfcuseradmin_module_options'));
         }
         return $this->options;
     }
 
-    public function getUserMapper()
-    {
+    public function getUserMapper() {
         if (null === $this->userMapper) {
             $this->userMapper = $this->getServiceLocator()->get('zfcuser_user_mapper');
         }
         return $this->userMapper;
     }
 
-    public function setUserMapper(UserInterface $userMapper)
-    {
+    public function setUserMapper(UserInterface $userMapper) {
         $this->userMapper = $userMapper;
         return $this;
     }
 
-    public function getAdminUserService()
-    {
+    public function getAdminUserService() {
         if (null === $this->adminUserService) {
             $this->adminUserService = $this->getServiceLocator()->get('zfcuseradmin_user_service');
         }
         return $this->adminUserService;
     }
 
-    public function setAdminUserService($service)
-    {
+    public function setAdminUserService($service) {
         $this->adminUserService = $service;
         return $this;
     }
 
-    public function setZfcUserOptions(ZfcUserModuleOptions $options)
-    {
+    public function setZfcUserOptions(ZfcUserModuleOptions $options) {
         $this->zfcUserOptions = $options;
         return $this;
     }
@@ -168,11 +158,73 @@ class UserAdminController extends AbstractActionController
     /**
      * @return \ZfcUser\Options\ModuleOptions
      */
-    public function getZfcUserOptions()
-    {
+    public function getZfcUserOptions() {
         if (!$this->zfcUserOptions instanceof ZfcUserModuleOptions) {
             $this->setZfcUserOptions($this->getServiceLocator()->get('zfcuser_module_options'));
         }
         return $this->zfcUserOptions;
     }
+
+    public function getDepartmentsAction() {
+
+        $parms = ($this->params()->fromQuery());
+        $page = $parms['page'];
+        $allDepartments = $this->getDepartmentList($parms['parent']);
+
+        $count = count($allDepartments);
+        $rows = $parms['rows'];
+        $total_pages = ceil($count / $rows);
+
+        $s = "<?xml version='1.0' encoding='utf-8'?>";
+        $s .= "<rows>";
+        $s .= "<page>" . $page . "</page>";
+        $s .= "<total>" . $total_pages . "</total>";
+        $s .= "<records>" . $count . "</records>";
+
+        $start = (($page - 1) * $rows);
+
+        if ($parms['_search'] === 'true') {
+            $filteredIssues = array_filter($allDepartments, function($e) {
+
+                $parms = ($this->params()->fromQuery());
+                if ($this->matchElement($parms['searchString'], $e->$parms['searchField'], $parms['searchOper'])) {
+                    return $e;
+                }
+            });
+            $allDepartments = array_values($filteredIssues);
+            $start = 0;
+            $rows = 5000;
+        }
+
+        for ($x = $start; $x < $start + $rows; $x++) {
+            if (!isset($allDepartments[$x]))
+                break;
+            $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
+            $s .= "<cell>" . $allDepartments[$x]->getName() . "</cell>";
+
+            //          $s .= "<cell><![CDATA[" . $allDepartments[$x]->note . "]]></cell>";
+            $s .= "</row>";
+        }
+        $s .= "</rows>";
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'application/xml');
+        $response->setStatusCode(200);
+        $response->setContent($s);
+
+        return $response;
+    }
+
+    public function getDepartmentList($parent) {
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+          $parent = $EntityManager
+                ->getRepository('Application\Entity\Client')
+                ->findBy(['parent' => $parent]);
+
+
+        return $parent;
+    }
+
 }

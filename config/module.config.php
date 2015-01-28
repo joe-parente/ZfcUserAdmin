@@ -67,6 +67,17 @@ return array(
                                     ),
                                 ),
                             ),
+                            'getdepartments' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getdepartments',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action'     => 'getdepartments',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
                         ),
                     ),
                 ),
