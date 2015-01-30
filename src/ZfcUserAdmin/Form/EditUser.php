@@ -72,7 +72,7 @@ class EditUser extends Register {
             'attributes' => array(
                 'required' => true,
                 'class' => 'form-control input-sm',
-                'style' => 'width: 150px',
+                'style' => 'width: 150px;',
             )
         ));
 //        $this->add(

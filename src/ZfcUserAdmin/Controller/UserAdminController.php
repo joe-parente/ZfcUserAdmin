@@ -169,6 +169,98 @@ class UserAdminController extends AbstractActionController {
 
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
+        $rows = $parms['rows'];
+
+        $allDepartments = $this->getDepartmentList($parms['parent']);
+        $userDepartments = $this->getUserDepartments($parms['user']);
+
+        $count = count($allDepartments);
+        $total_pages = ceil($count / $rows);
+        $deptTable = [];
+        foreach ($allDepartments as $dept) {
+            $id = $dept->getId();
+            $deptTable[$id] = false;
+            foreach ($userDepartments as $userDepot) {
+
+                if ($userDepot->getId() == $id) {
+
+                    $deptTable[$id] = true;
+                }
+            }
+        }
+
+
+        $s = "<?xml version='1.0' encoding='utf-8'?>";
+        $s .= "<rows>";
+        $s .= "<page>" . $page . "</page>";
+        $s .= "<total>" . $total_pages . "</total>";
+        $s .= "<records>" . $count . "</records>";
+
+        $start = (($page - 1) * $rows);
+        if ($parms['_search'] === 'true') {
+
+            $filteredIssues = array_filter($allDepartments, function($e) {
+
+                $parms = ($this->params()->fromQuery());
+                if ($this->matchElement($parms['searchString'], $e->$parms['searchField'], $parms['searchOper'])) {
+                    return $e;
+                }
+            });
+            $allDepartments = array_values($filteredIssues);
+            $start = 0;
+            $rows = 5000;
+        }
+
+        for ($x = $start; $x < $start + $rows; $x++) {
+
+            if (!isset($allDepartments[$x]))
+                break;
+
+            $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+
+            if (isset($deptTable[$allDepartments[$x]->getId()])) {
+
+                $inThere = $deptTable[$allDepartments[$x]->getId()];
+                $s .= "<cell>" . $inThere . "</cell>";
+            } else {
+                $s .= "<cell>" . false . "</cell>";
+            }
+            $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
+            $s .= "<cell>" . $allDepartments[$x]->getName() . "</cell>";
+            $s .= "</row>";
+        }
+        $s .= "</rows>";
+        return($this->setUpResponse($s));
+    }
+
+    public function getDepartmentList($parent) {
+
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $depts = $EntityManager
+                ->getRepository('Application\Entity\Client')
+                ->findBy(['parent' => $parent]);
+        return $depts;
+    }
+
+    public function getUserDepartments($userId) {
+
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $user = $EntityManager
+                ->getRepository('Application\Entity\User')
+                ->findBy(['id' => $userId]);
+        $departments = $user[0]->getClients();
+
+        return $departments;
+    }
+
+    public function updateDepartmentAction() {
+
+        $parms = ($this->params()->fromQuery());
+        $page = $parms['page'];
         $allDepartments = $this->getDepartmentList($parms['parent']);
 
         $count = count($allDepartments);
@@ -200,6 +292,13 @@ class UserAdminController extends AbstractActionController {
             if (!isset($allDepartments[$x]))
                 break;
             $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            if (isset($deptTable[$allDepartments[$x]->getId()])) {
+
+                $inThere = $deptTable[$allDepartments[$x]->getId()];
+                $s .= "<cell>" . $inThere . "</cell>";
+            } else {
+                $s .= "<cell>" . false . "</cell>";
+            }
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getName() . "</cell>";
 
@@ -207,24 +306,41 @@ class UserAdminController extends AbstractActionController {
             $s .= "</row>";
         }
         $s .= "</rows>";
+
+        return($this->setUpResponse($s));
+    }
+
+    public function setUpResponse($text) {
         $response = $this->getResponse();
         $response->getHeaders()->addHeaderLine('Content-Type', 'application/xml');
         $response->setStatusCode(200);
-        $response->setContent($s);
-
+        $response->setContent($text);
         return $response;
     }
 
-    public function getDepartmentList($parent) {
+    public function selectDepartmentAction() {
+
+        $parms = $_POST;
+
         $EntityManager = $this
                 ->getServiceLocator()
                 ->get('Doctrine\ORM\EntityManager');
-          $parent = $EntityManager
+
+        $user = $EntityManager
+                ->getRepository('Application\Entity\User')
+                ->findBy(['id' => $parms['user']]);
+        $client = $EntityManager
                 ->getRepository('Application\Entity\Client')
-                ->findBy(['parent' => $parent]);
+                ->findOneBy(['id' => $parms['id']]);
+        if ($parms['ischecked'] == "true") {
+            $user[0]->addClient($client);
+        } else {
+            $user[0]->removeClient($parms['id']);
+        }
+        $EntityManager->persist($user[0]);
+        $EntityManager->flush();
 
-
-        return $parent;
+        return $this->setUpResponse("<?xml version='1.0' encoding='utf-8'?><data></data>");
     }
 
 }

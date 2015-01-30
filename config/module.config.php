@@ -78,6 +78,28 @@ return array(
                                 ),
                                 'mayterminate' => true,
                             ),
+                            'updatedepartments' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/updatedepartments',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action'     => 'updatedepartments',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
+                            'selectdepartment' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/selectdepartment',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action'     => 'selectdepartment',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
                         ),
                     ),
                 ),
