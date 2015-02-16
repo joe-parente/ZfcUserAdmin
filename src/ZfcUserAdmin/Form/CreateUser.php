@@ -57,27 +57,21 @@ class CreateUser extends Register {
                     )
                 )
         );
-        $this->add(
-                array(
-                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',
-                    'name' => 'clients',
-                    'attributes' => array(
-                        'multiple' => true,
-                    ),
-                    'options' => array(
-                        'object_manager' => $objectManager,
-                        'target_class' => 'Application\Entity\Client',
-                        'property' => 'id',
-//                        'is_method' => true,
-//                        'find_method' => array(
-//                            'name' => 'clientsByUser',
-//                            'params' => array(
-//                                'criteria' => array('id' => $parent),
-//                            ),
-//                        )
-                    )
-                )
-        );
+        $this->add(array(
+            'name' => 'parentclientid',
+            'type' => 'Application\Form\Element\DtgAutocompleteElement',
+            'options' => array(
+                'label' => 'Parent Client',
+                'sm' => $serviceManager, // don't forget to send Service Manager
+                'property' => 'parentclientid',
+                
+            ),
+            'attributes' => array(
+                'required' => true,
+                'class' => 'form-control input-sm',
+                'style' => 'width: 150px;',
+            )
+        ));
         $this->get('submit')->setAttribute('label', 'Create');
     }
 

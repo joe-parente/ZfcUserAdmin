@@ -172,13 +172,19 @@ class UserAdminController extends AbstractActionController {
         $rows = $parms['rows'];
 
         $allDepartments = $this->getDepartmentList($parms['parent']);
-        $userDepartments = $this->getUserDepartments($parms['user']);
-
+        if (($parms['user'] != 'undefined')) {
+            $userDepartments = $this->getUserDepartments($parms['user']);
+        } else {
+            $userDepartments = '';
+        }
         $count = count($allDepartments);
         $total_pages = ceil($count / $rows);
         $deptTable = [];
         foreach ($allDepartments as $dept) {
             $id = $dept->getId();
+            if ($userDepartments == '') {
+                break;
+            }
             $deptTable[$id] = false;
             foreach ($userDepartments as $userDepot) {
 
