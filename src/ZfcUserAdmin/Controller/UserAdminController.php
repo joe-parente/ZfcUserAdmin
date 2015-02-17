@@ -94,7 +94,10 @@ class UserAdminController extends AbstractActionController {
 
         return array(
             'editUserForm' => $form,
-            'userId' => $userId
+            'userId' => $userId,
+            'createddate' => $user->getCreatedDate(),
+            'modifieddate' => $user->getModifiedDate(),
+            'lastlogindate' => $user->getLastLoginDate(),
         );
     }
 

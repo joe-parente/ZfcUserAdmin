@@ -61,14 +61,8 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         $criteria = array('id' => $data['roles']['0']);
         $userRole = $em->getRepository('Application\Entity\Role')->findOneBy($criteria);
         $user->addRole($userRole);
-
-//        $user->removeClients();
-//        foreach ($data['clients'] as $client) {
-//
-//            $criteria = array('id' => $client);
-//            $userClient = $em->getRepository('Application\Entity\Client')->findOneBy($criteria);
-//            $user->addClient($userClient);
-//        }
+        
+        $user->setCreateDateTime(new \DateTime);
 
         $argv += array('user' => $user, 'form' => $form, 'data' => $data);
         $this->getEventManager()->trigger(__FUNCTION__, $this, $argv);
@@ -128,13 +122,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         $user->setParentClientId($data['parentclientid']);
         $argv += array('user' => $user, 'form' => $form, 'data' => $data);
 
-//        $user->removeClients();
-//        foreach ($data['clients'] as $client) {
-//
-//            $criteria = array('id' => $client);
-//            $userClient = $em->getRepository('Application\Entity\Client')->findOneBy($criteria);
-//            $user->addClient($userClient);
-//        }
+        $user->setModifiedDateTime(new \DateTime);
 
         $this->getEventManager()->trigger(__FUNCTION__, $this, $argv);
         $this->getUserMapper()->update($user);
