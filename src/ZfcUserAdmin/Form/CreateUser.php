@@ -57,6 +57,18 @@ class CreateUser extends Register {
                     )
                 )
         );
+        $this->add(
+                array(
+                    'type' => 'Zend\Form\Element\Checkbox',
+                    'name' => 'state',
+                    'attributes' => array(
+                        'style' => 'display: inline;',
+                    ),
+                    'options' => array(
+                        'label' => 'Suspended:',
+                    ),
+                )
+        );
         $this->add(array(
             'name' => 'parentclientid',
             'type' => 'Application\Form\Element\DtgAutocompleteElement',
@@ -64,7 +76,6 @@ class CreateUser extends Register {
                 'label' => 'Parent Client',
                 'sm' => $serviceManager, // don't forget to send Service Manager
                 'property' => 'parentclientid',
-                
             ),
             'attributes' => array(
                 'required' => true,
