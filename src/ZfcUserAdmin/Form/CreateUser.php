@@ -49,6 +49,7 @@ class CreateUser extends Register {
                     'name' => 'roles',
                     'attributes' => array(
                         'multiple' => false,
+                        'style' => 'margin: .7em;',
                     ),
                     'options' => array(
                         'object_manager' => $objectManager,

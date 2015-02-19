@@ -120,6 +120,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         $userRole = $em->getRepository('Application\Entity\Role')->findOneBy($criteria);
         $user->addRole($userRole);
         $user->setParentClientId($data['parentclientid']);
+        $user->setModifiedDateTime (new \DateTime());
         $argv += array('user' => $user, 'form' => $form, 'data' => $data);
 
         $user->setModifiedDateTime(new \DateTime);
