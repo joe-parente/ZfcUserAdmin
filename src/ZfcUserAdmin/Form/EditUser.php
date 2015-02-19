@@ -52,8 +52,10 @@ class EditUser extends Register {
                     'name' => 'roles',
                     'attributes' => array(
                         'multiple' => false,
+                        'style' => 'margin: .7em;',
                     ),
                     'options' => array(
+                        'label' => 'User role',
                         'object_manager' => $objectManager,
                         'target_class' => 'Application\Entity\Role',
                         'property' => 'roleId',
