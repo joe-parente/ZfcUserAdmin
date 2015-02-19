@@ -82,11 +82,11 @@ class UserAdminController extends AbstractActionController {
             $form->setData($request->getPost());
             $tester = $user->getRoles();
             if ($form->isValid()) {
-                
+
                 $user = $this->getAdminUserService()->edit($form, (array) $request->getPost(), $user);
                 if ($user) {
                     $this->flashMessenger()->addSuccessMessage('The user was edited');
-                    
+
                     return $this->redirect()->toRoute('zfcadmin/zfcuseradmin/list');
                 }
             }
@@ -352,6 +352,40 @@ class UserAdminController extends AbstractActionController {
         $EntityManager->flush();
 
         return $this->setUpResponse("<?xml version='1.0' encoding='utf-8'?><data></data>");
+    }
+
+    public static function matchElement($needle, $haystack, $op) {
+
+        switch ($op) {
+            case 'eq':
+                if ($needle == $haystack) {
+                    return true;
+                }
+                break;
+            case 'ne':
+                if ($needle != $haystack) {
+                    return true;
+                }
+                break;
+            case 'lt':
+                if ($needle > $haystack) {
+                    return true;
+                }
+                break;
+            case 'gt':
+                if ($needle < $haystack) {
+                    return true;
+                }
+                break;
+            case 'cn':
+                $result = strpos($haystack, $needle);
+                if ($result !== false) {
+                    return true;
+                }
+        }
+
+
+        return false;
     }
 
 }
