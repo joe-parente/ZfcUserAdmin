@@ -8,11 +8,15 @@ use Zend\Stdlib\Hydrator\ClassMethods;
 use ZfcUser\Mapper\UserInterface;
 use ZfcUser\Options\ModuleOptions as ZfcUserModuleOptions;
 use ZfcUserAdmin\Options\ModuleOptions;
+use Zend\Session\Container;
 
 class UserAdminController extends AbstractActionController {
 
     protected $options, $userMapper;
     protected $zfcUserOptions;
+    protected $_namespace = 'InquiryController';
+    protected $_session;
+    protected $_data;
 
     /**
      * @var \ZfcUserAdmin\Service\User
@@ -20,6 +24,10 @@ class UserAdminController extends AbstractActionController {
     protected $adminUserService;
 
     public function listAction() {
+
+        $this->_session = new Container($this->_namespace);
+        $this->_session['multi-clients'] = [];
+
         $userMapper = $this->getUserMapper();
         $users = $userMapper->findAll();
         if (is_array($users)) {
@@ -37,6 +45,8 @@ class UserAdminController extends AbstractActionController {
     }
 
     public function createAction() {
+
+
         /** @var $form \ZfcUserAdmin\Form\CreateUser */
         $form = $this->getServiceLocator()->get('zfcuseradmin_createuser_form');
         $request = $this->getRequest();
@@ -172,11 +182,16 @@ class UserAdminController extends AbstractActionController {
 
     public function getDepartmentsAction() {
 
+        $this->_session = new Container($this->_namespace);
+
+
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $rows = $parms['rows'];
+        $parent = $parms['parent'];
 
-        $allDepartments = $this->getDepartmentList($parms['parent']);
+        $this->_session['multi-clients'][] = $parent;
+        $allDepartments = $this->getDepartmentList($this->_session['multi-clients']);
         if (($parms['user'] != 'undefined')) {
             $userDepartments = $this->getUserDepartments($parms['user']);
         } else {
@@ -238,13 +253,18 @@ class UserAdminController extends AbstractActionController {
 
     public function getDepartmentList($parent) {
 
-        $EntityManager = $this
-                ->getServiceLocator()
-                ->get('Doctrine\ORM\EntityManager');
-        $depts = $EntityManager
-                ->getRepository('Application\Entity\Client')
-                ->findBy(['parent' => $parent]);
-        return $depts;
+        foreach ($parent as $each) {
+            $EntityManager = $this
+                    ->getServiceLocator()
+                    ->get('Doctrine\ORM\EntityManager');
+            $depts = $EntityManager
+                    ->getRepository('Application\Entity\Client')
+                    ->findBy(['parent' => $each]);
+            foreach ($depts as $dept) {
+                $return[] = $dept;
+            }
+        }
+        return $return;
     }
 
     public function getUserDepartments($userId) {
@@ -262,9 +282,12 @@ class UserAdminController extends AbstractActionController {
 
     public function updateDepartmentAction() {
 
+        
+        $this->_session = new Container($this->_namespace);
+        
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
-        $allDepartments = $this->getDepartmentList($parms['parent']);
+        $allDepartments = $this->getDepartmentList($this->_session['multi-clients']);
 
         $count = count($allDepartments);
         $rows = $parms['rows'];
