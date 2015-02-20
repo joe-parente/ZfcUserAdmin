@@ -80,7 +80,7 @@ class EditUser extends Register {
             'type' => 'Application\Form\Element\DtgAutocompleteElement',
             'options' => array(
                 'label' => 'Parent Client',
-                'sm' => $serviceManager, // don't forget to send Service Manager
+                'sm' => $serviceManager,
                 'property' => 'parentclientid',
             ),
             'attributes' => array(

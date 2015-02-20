@@ -228,14 +228,6 @@ class UserAdminController extends AbstractActionController {
                 break;
 
             $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
-
-            if (isset($deptTable[$allDepartments[$x]->getId()])) {
-
-                $inThere = $deptTable[$allDepartments[$x]->getId()];
-                $s .= "<cell>" . $inThere . "</cell>";
-            } else {
-                $s .= "<cell>" . false . "</cell>";
-            }
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getName() . "</cell>";
             $s .= "</row>";
@@ -311,9 +303,7 @@ class UserAdminController extends AbstractActionController {
                 $s .= "<cell>" . false . "</cell>";
             }
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
-            $s .= "<cell>" . $allDepartments[$x]->getName() . "</cell>";
-
-            //          $s .= "<cell><![CDATA[" . $allDepartments[$x]->note . "]]></cell>";
+            $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
             $s .= "</row>";
         }
         $s .= "</rows>";
@@ -386,6 +376,67 @@ class UserAdminController extends AbstractActionController {
 
 
         return false;
+    }
+
+    public function getAllClientsAction() {
+
+        $parms = ($this->params()->fromQuery());
+        $page = $parms['page'];
+        $allDepartments = $this->getAllClients();
+
+        $count = count($allDepartments);
+        $rows = $parms['rows'];
+        $total_pages = ceil($count / $rows);
+
+        $s = "<?xml version='1.0' encoding='utf-8'?>";
+        $s .= "<rows>";
+        $s .= "<page>" . $page . "</page>";
+        $s .= "<total>" . $total_pages . "</total>";
+        $s .= "<records>" . $count . "</records>";
+
+        $start = (($page - 1) * $rows);
+
+        if ($parms['_search'] === 'true') {
+            $filteredIssues = array_filter($allDepartments, function($e) {
+
+                $parms = ($this->params()->fromQuery());
+                $searchFunction = 'get' . $parms['searchField'];
+                if ($this->matchElement($parms['searchString'], $e->$searchFunction(), $parms['searchOper'])) {
+                    return $e;
+                }
+            });
+            $allDepartments = array_values($filteredIssues);
+            $start = 0;
+            $rows = 5000;
+        }
+
+        for ($x = $start; $x < $start + $rows; $x++) {
+            if (!isset($allDepartments[$x]))
+                break;
+            $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
+            $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
+            $s .= "</row>";
+        }
+        $s .= "</rows>";
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'application/xml');
+        $response->setStatusCode(200);
+        $response->setContent($s);
+
+        return $response;
+    }
+
+    public function getAllClients() {
+
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $departments = $EntityManager
+                ->getRepository('Application\Entity\Client')
+                ->findBy(['parent' => null]);
+
+        return $departments;
     }
 
 }

@@ -100,6 +100,17 @@ return array(
                                 ),
                                 'mayterminate' => true,
                             ),
+                            'getallclients' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getallclients',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action'     => 'getallclients',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
                         ),
                     ),
                 ),
