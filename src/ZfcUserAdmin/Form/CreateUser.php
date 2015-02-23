@@ -94,7 +94,7 @@ class CreateUser extends Register {
                         ))]
                 );
             }
-            
+
             $this->add(array(
                 'name' => $element,
                 'options' => array(
@@ -118,6 +118,7 @@ class CreateUser extends Register {
                         'object_manager' => $objectManager,
                         'target_class' => 'Application\Entity\Role',
                         'property' => 'roleId',
+                        'label' => 'Role:',
                     )
                 )
         );
@@ -148,6 +149,17 @@ class CreateUser extends Register {
 //            )
 //        ));
         $this->get('submit')->setAttribute('label', 'Create');
+        $this->add([
+            'name' => 'cancel',
+            'type' => 'Zend\Form\Element\Button',
+            'attributes' => [
+                'onclick' => 'window.location = "/admin/user/list";',
+                'value' => 'Cancel',
+            ],
+            'options' => [
+                'label' => 'Cancel',
+            ]
+        ]);
     }
 
     public function setCreateOptions(UserCreateOptionsInterface $createOptionsOptions) {
