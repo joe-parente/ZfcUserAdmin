@@ -406,7 +406,9 @@ class UserAdminController extends AbstractActionController {
 
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
-        $allDepartments = $this->getAllClients();
+        $region = $parms['region'];
+        $allDepartments = $this->getAllClients($region);
+        
 
         $count = count($allDepartments);
         $rows = $parms['rows'];
@@ -451,14 +453,19 @@ class UserAdminController extends AbstractActionController {
         return $response;
     }
 
-    public function getAllClients() {
+    public function getAllClients($region) {
 
         $EntityManager = $this
                 ->getServiceLocator()
                 ->get('Doctrine\ORM\EntityManager');
+        $region = $EntityManager
+                ->getRepository('Application\Entity\Regionxref')
+                ->findOneBy(['pky' => $region])
+                ->getR5wRegionpky();
+
         $departments = $EntityManager
                 ->getRepository('Application\Entity\Client')
-                ->findBy(['parent' => null]);
+                ->findBy(['parent' => null, 'region_id' => $region]);
 
         return $departments;
     }

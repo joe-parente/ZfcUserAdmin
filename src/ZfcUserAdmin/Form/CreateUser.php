@@ -134,6 +134,23 @@ class CreateUser extends Register {
                     ),
                 )
         );
+        $this->add(
+                array(
+                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+                    'name' => 'name',
+                    'options' => array(
+                        'object_manager' => $objectManager,
+                        'target_class' => 'Application\Entity\Regionxref',
+                        'property' => 'r5wRegionname',
+                        'label' => 'Region',
+                        'display_empty_item' => true,
+                        'empty_item_label' => 'Select Region'
+                    ),
+                    'attributes' => [
+                        'onChange' => 'loadParentGrid($(this).val());',
+                    ],
+                )
+        );
 //        $this->add(array(
 //            'name' => 'parentclientid',
 //            'type' => 'Application\Form\Element\DtgAutocompleteElement',
