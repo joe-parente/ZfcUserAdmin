@@ -65,7 +65,7 @@ class UserAdminController extends AbstractActionController {
             if ($form->isValid()) {
                 $user = $this->getAdminUserService()->create($form, (array) $request->getPost());
                 if ($user) {
-                    $this->flashMessenger()->addSuccessMessage('The user was created');
+                    $this->flashMessenger()->addMessage('The user was created');
                     return $this->redirect()->toRoute('zfcadmin/zfcuseradmin/list');
                 }
             }
@@ -95,7 +95,7 @@ class UserAdminController extends AbstractActionController {
 
                 $user = $this->getAdminUserService()->edit($form, (array) $request->getPost(), $user);
                 if ($user) {
-                    $this->flashMessenger()->addSuccessMessage('The user was edited');
+                    $this->flashMessenger()->addMessage('The user was edited');
 
                     return $this->redirect()->toRoute('zfcadmin/zfcuseradmin/list');
                 }
