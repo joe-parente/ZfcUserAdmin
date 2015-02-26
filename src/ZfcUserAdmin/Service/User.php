@@ -61,8 +61,14 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         $criteria = array('id' => $data['roles']['0']);
         $userRole = $em->getRepository('Application\Entity\Role')->findOneBy($criteria);
         $user->addRole($userRole);
-        
         $user->setCreateDateTime(new \DateTime);
+        $user->setParentClientId(explode(',', $data['parent_list']));
+        $clients = array_unique(explode(',', $data['department_list']));
+        foreach ($clients as $client) {
+            if ($client == null) {continue;}
+            $clientObj = $em->getRepository('Application\Entity\Client')->findOneBy(['id' => $client]);
+            $user->addClient($clientObj);
+        }
 
         $argv += array('user' => $user, 'form' => $form, 'data' => $data);
         $this->getEventManager()->trigger(__FUNCTION__, $this, $argv);

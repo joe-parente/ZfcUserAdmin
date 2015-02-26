@@ -243,9 +243,9 @@ class UserAdminController extends AbstractActionController {
                 break;
 
             $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
-            $s .= "<cell>" . $allDepartments[$x]->getParent()->getName() . "</cell>";
+            $s .= "<cell><![CDATA[" . $allDepartments[$x]->getParent()->getName() . "]]></cell>";
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
-            $s .= "<cell>" . $allDepartments[$x]->getName() . "</cell>";
+            $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
             $s .= "</row>";
         }
         $s .= "</rows>";
