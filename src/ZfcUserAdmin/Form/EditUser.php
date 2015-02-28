@@ -75,20 +75,20 @@ class EditUser extends Register {
                     ),
                 )
         );
-        $this->add(array(
-            'name' => 'parentclientid',
-            'type' => 'Application\Form\Element\DtgAutocompleteElement',
-            'options' => array(
-                'label' => 'Parent Client',
-                'sm' => $serviceManager,
-                'property' => 'parentclientid',
-            ),
-            'attributes' => array(
-                'required' => true,
-                'class' => 'form-control input-sm',
-                'style' => 'width: 150px;',
-            )
-        ));
+//        $this->add(array(
+//            'name' => 'parentclientid',
+//            'type' => 'Application\Form\Element\DtgAutocompleteElement',
+//            'options' => array(
+//                'label' => 'Parent Client',
+//                'sm' => $serviceManager,
+//                'property' => 'parentclientid',
+//            ),
+//            'attributes' => array(
+//                'required' => true,
+//                'class' => 'form-control input-sm',
+//                'style' => 'width: 150px;',
+//            )
+//        ));
 //        $this->add(
 //                array(
 //                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',

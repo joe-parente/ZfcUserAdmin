@@ -1,4 +1,5 @@
 <?php
+
 return array(
     'view_manager' => array(
         'template_path_stack' => array(
@@ -21,17 +22,17 @@ return array(
                             'route' => '/user',
                             'defaults' => array(
                                 'controller' => 'zfcuseradmin',
-                                'action'     => 'index',
+                                'action' => 'index',
                             ),
                         ),
-                        'child_routes' =>array(
+                        'child_routes' => array(
                             'list' => array(
                                 'type' => 'Segment',
                                 'options' => array(
                                     'route' => '/list[/:p]',
                                     'defaults' => array(
                                         'controller' => 'zfcuseradmin',
-                                        'action'     => 'list',
+                                        'action' => 'list',
                                     ),
                                 ),
                             ),
@@ -41,7 +42,7 @@ return array(
                                     'route' => '/create',
                                     'defaults' => array(
                                         'controller' => 'zfcuseradmin',
-                                        'action'     => 'create'
+                                        'action' => 'create'
                                     ),
                                 ),
                             ),
@@ -51,8 +52,8 @@ return array(
                                     'route' => '/edit/:userId',
                                     'defaults' => array(
                                         'controller' => 'zfcuseradmin',
-                                        'action'     => 'edit',
-                                        'userId'     => 0
+                                        'action' => 'edit',
+                                        'userId' => 0
                                     ),
                                 ),
                             ),
@@ -62,8 +63,8 @@ return array(
                                     'route' => '/remove/:userId',
                                     'defaults' => array(
                                         'controller' => 'zfcuseradmin',
-                                        'action'     => 'remove',
-                                        'userId'     => 0
+                                        'action' => 'remove',
+                                        'userId' => 0
                                     ),
                                 ),
                             ),
@@ -73,7 +74,7 @@ return array(
                                     'route' => '/getdepartments',
                                     'defaults' => array(
                                         'controller' => 'zfcuseradmin',
-                                        'action'     => 'getdepartments',
+                                        'action' => 'getdepartments',
                                     ),
                                 ),
                                 'mayterminate' => true,
@@ -84,7 +85,7 @@ return array(
                                     'route' => '/updatedepartments',
                                     'defaults' => array(
                                         'controller' => 'zfcuseradmin',
-                                        'action'     => 'updatedepartments',
+                                        'action' => 'updatedepartments',
                                     ),
                                 ),
                                 'mayterminate' => true,
@@ -95,7 +96,7 @@ return array(
                                     'route' => '/selectdepartment',
                                     'defaults' => array(
                                         'controller' => 'zfcuseradmin',
-                                        'action'     => 'selectdepartment',
+                                        'action' => 'selectdepartment',
                                     ),
                                 ),
                                 'mayterminate' => true,
@@ -106,7 +107,40 @@ return array(
                                     'route' => '/getallclients',
                                     'defaults' => array(
                                         'controller' => 'zfcuseradmin',
-                                        'action'     => 'getallclients',
+                                        'action' => 'getallclients',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
+                            'getuseravailableclients' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getuseravailableclients',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getuseravailableclients',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
+                            'getuserselectedclients' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getuserselectedclients',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getuserselectedclients',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
+                            'getregions' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getregions',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getregions',
                                     ),
                                 ),
                                 'mayterminate' => true,
@@ -117,7 +151,6 @@ return array(
             ),
         ),
     ),
-
     'navigation' => array(
         'admin' => array(
             'zfcuseradmin' => array(
@@ -132,7 +165,6 @@ return array(
             ),
         ),
     ),
-
     'zfcuseradmin' => array(
         'zfcuseradmin_mapper' => 'ZfcUserAdmin\Mapper\UserZendDb',
     )

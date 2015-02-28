@@ -79,6 +79,8 @@ class UserAdminController extends AbstractActionController {
     public function editAction() {
         $userId = $this->getEvent()->getRouteMatch()->getParam('userId');
         $user = $this->getUserMapper()->findById($userId);
+        $this->_session = new Container($this->_namespace);
+        $this->_session['user'] = $user->getId();
 
         /** @var $form \ZfcUserAdmin\Form\EditUser */
         $form = $this->getServiceLocator()->get('zfcuseradmin_edituser_form');
@@ -122,7 +124,7 @@ class UserAdminController extends AbstractActionController {
             $user = $this->getUserMapper()->findById($userId);
             if ($user) {
                 $this->getUserMapper()->remove($user);
-                $this->flashMessenger()->addSuccessMessage('The user was deleted');
+                $this->flashMessenger()->addMessage('The user was deleted');
             }
         }
 
@@ -283,9 +285,9 @@ class UserAdminController extends AbstractActionController {
 
     public function updateDepartmentAction() {
 
-        
+
         $this->_session = new Container($this->_namespace);
-        
+
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $allDepartments = $this->getDepartmentList($this->_session['multi-clients']);
@@ -408,7 +410,90 @@ class UserAdminController extends AbstractActionController {
         $page = $parms['page'];
         $region = $parms['region'];
         $allDepartments = $this->getAllClients($region);
-        
+
+
+        $count = count($allDepartments);
+        $rows = $parms['rows'];
+        $total_pages = ceil($count / $rows);
+
+        $s = "<?xml version='1.0' encoding='utf-8'?>";
+        $s .= "<rows>";
+        $s .= "<page>" . $page . "</page>";
+        $s .= "<total>" . $total_pages . "</total>";
+        $s .= "<records>" . $count . "</records>";
+
+        $start = (($page - 1) * $rows);
+
+        if ($parms['_search'] === 'true') {
+            $filteredIssues = array_filter($allDepartments, function($e) {
+
+                $parms = ($this->params()->fromQuery());
+                $searchFunction = 'get' . $parms['searchField'];
+                if ($this->matchElement($parms['searchString'], $e->$searchFunction(), $parms['searchOper'])) {
+                    return $e;
+                }
+            });
+            $allDepartments = array_values($filteredIssues);
+            $start = 0;
+            $rows = 5000;
+        }
+
+        for ($x = $start; $x < $start + $rows; $x++) {
+            if (!isset($allDepartments[$x]))
+                break;
+            $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $s .= "<cell>" . $allDepartments[$x]->getRegionId() . "</cell>";
+            $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
+            $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
+            $s .= "</row>";
+        }
+        $s .= "</rows>";
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'application/xml');
+        $response->setStatusCode(200);
+        $response->setContent($s);
+
+        return $response;
+    }
+
+    public function getAllClients($region) {
+
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $region_id = $EntityManager
+                ->getRepository('Application\Entity\Regionxref')
+                ->findOneBy(['r5wRegionname' => $region])
+                ->getR5wRegionpky();
+
+        $departments = $EntityManager
+                ->getRepository('Application\Entity\Client')
+                ->findBy(['parent' => null, 'region_id' => $region_id]);
+
+        return $departments;
+    }
+
+    public function getUserAvailableClientsAction() {
+
+        $parms = ($this->params()->fromQuery());
+        $page = $parms['page'];
+        $this->_session = new Container($this->_namespace);
+        $userId = $this->_session['user'];
+
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $user = $EntityManager
+                ->getRepository('Application\Entity\User')
+                ->findOneBy(['id' => $userId]);
+
+
+        $region = $user->getClients()[0]->getRegionId();
+
+
+
+        $allDepartments = $this->getAllClients($region);
+
 
         $count = count($allDepartments);
         $rows = $parms['rows'];
@@ -453,21 +538,118 @@ class UserAdminController extends AbstractActionController {
         return $response;
     }
 
-    public function getAllClients($region) {
+    public function getUserSelectedClientsAction() {
+
+        $parms = ($this->params()->fromQuery());
+        $page = $parms['page'];
+        $this->_session = new Container($this->_namespace);
+        $userId = $this->_session['user'];
 
         $EntityManager = $this
                 ->getServiceLocator()
                 ->get('Doctrine\ORM\EntityManager');
-        $region = $EntityManager
+        $user = $EntityManager
+                ->getRepository('Application\Entity\User')
+                ->findOneBy(['id' => $userId]);
+
+        $allDepartments = $user->getClients();
+
+        $count = count($allDepartments);
+        $rows = $parms['rows'];
+        $total_pages = ceil($count / $rows);
+
+        $s = "<?xml version='1.0' encoding='utf-8'?>";
+        $s .= "<rows>";
+        $s .= "<page>" . $page . "</page>";
+        $s .= "<total>" . $total_pages . "</total>";
+        $s .= "<records>" . $count . "</records>";
+
+        $start = (($page - 1) * $rows);
+
+        if ($parms['_search'] === 'true') {
+            $filteredIssues = array_filter($allDepartments, function($e) {
+
+                $parms = ($this->params()->fromQuery());
+                $searchFunction = 'get' . $parms['searchField'];
+                if ($this->matchElement($parms['searchString'], $e->$searchFunction(), $parms['searchOper'])) {
+                    return $e;
+                }
+            });
+            $allDepartments = array_values($filteredIssues);
+            $start = 0;
+            $rows = 5000;
+        }
+
+        for ($x = $start; $x < $start + $rows; $x++) {
+            if (!isset($allDepartments[$x]))
+                break;
+            $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
+            $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
+            $s .= "</row>";
+        }
+        $s .= "</rows>";
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'application/xml');
+        $response->setStatusCode(200);
+        $response->setContent($s);
+
+        return $response;
+    }
+
+    public function getRegionsAction() {
+        
+        $parms = ($this->params()->fromQuery());
+        $page = $parms['page'];
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $xref = $EntityManager
                 ->getRepository('Application\Entity\Regionxref')
-                ->findOneBy(['pky' => $region])
-                ->getR5wRegionpky();
+                ->findAll();
+        $allDepartments = $xref;
 
-        $departments = $EntityManager
-                ->getRepository('Application\Entity\Client')
-                ->findBy(['parent' => null, 'region_id' => $region]);
+        $count = count($allDepartments);
+        $rows = $parms['rows'];
+        $total_pages = ceil($count / $rows);
 
-        return $departments;
+        $s = "<?xml version='1.0' encoding='utf-8'?>";
+        $s .= "<rows>";
+        $s .= "<page>" . $page . "</page>";
+        $s .= "<total>" . $total_pages . "</total>";
+        $s .= "<records>" . $count . "</records>";
+
+        $start = (($page - 1) * $rows);
+
+        if ($parms['_search'] === 'true') {
+            $filteredIssues = array_filter($allDepartments, function($e) {
+
+                $parms = ($this->params()->fromQuery());
+                $searchFunction = 'get' . $parms['searchField'];
+                if ($this->matchElement($parms['searchString'], $e->$searchFunction(), $parms['searchOper'])) {
+                    return $e;
+                }
+            });
+            $allDepartments = array_values($filteredIssues);
+            $start = 0;
+            $rows = 5000;
+        }
+
+        for ($x = $start; $x < $start + $rows; $x++) {
+            if (!isset($allDepartments[$x]))
+                break;
+            $s .= "<row id='" . $allDepartments[$x]->getPky() . "'>";
+            $s .= "<cell>" . $allDepartments[$x]->getR5wRegionname() . "</cell>";
+            $s .= "<cell><![CDATA[" . $allDepartments[$x]->getCompanyname() . "]]></cell>";
+            $s .= "</row>";
+        }
+        $s .= "</rows>";
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'application/xml');
+        $response->setStatusCode(200);
+        $response->setContent($s);
+
+        return $response;
     }
 
 }

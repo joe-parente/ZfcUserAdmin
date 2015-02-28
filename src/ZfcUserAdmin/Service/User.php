@@ -91,7 +91,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
 //            $setter = $this->getAccessorName($key);
 //            if (method_exists($user, $setter)) call_user_func(array($user, $setter), $value);
 //        }
-        if (is_array($data['parentclientid'])) {
+        if (isset($data['parentclientid']) && is_array($data['parentclientid'])) {
             $data['parentclientid'] = $data['parentclientid']['id'];
         }
         $argv = array();
@@ -128,8 +128,6 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         $user->setParentClientId($data['parentclientid']);
         $user->setModifiedDateTime (new \DateTime());
         $argv += array('user' => $user, 'form' => $form, 'data' => $data);
-
-        $user->setModifiedDateTime(new \DateTime);
 
         $this->getEventManager()->trigger(__FUNCTION__, $this, $argv);
         $this->getUserMapper()->update($user);
