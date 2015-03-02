@@ -404,12 +404,27 @@ class UserAdminController extends AbstractActionController {
         return false;
     }
 
+    public function compareDepartmentsAscending($a, $b) {
+        return strcmp($a->getName(), $b->getName());
+    }
+    public function compareDepartmentsDescending($a, $b) {
+        return strcmp($b->getName (), $a->getName ());
+        
+    }
+
     public function getAllClientsAction() {
 
+        $this->_session = new Container($this->_namespace);
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $region = $parms['region'];
-        $allDepartments = $this->getAllClients($region);
+        $multiRegion = $this->_session['multi-region'];
+        if (!is_array($multiRegion) || !in_array($region, $multiRegion)) {
+            $multiRegion[] = $region;
+        }
+        $this->_session['multi-region'] = $multiRegion;
+        //echo 'Multi-region' . var_dump($multiRegion);
+        $allDepartments = $this->getAllClients($this->_session['multi-region']);
 
 
         $count = count($allDepartments);
@@ -437,12 +452,28 @@ class UserAdminController extends AbstractActionController {
             $start = 0;
             $rows = 5000;
         }
-
+        if (isset($parms['sidx'])) {
+            if (isset($parms['sord'])) {
+                if ($parms['sord'] == 'asc') {
+                    usort($allDepartments, [$this, 'compareDepartmentsAscending']);
+                } else {
+                    usort($allDepartments, [$this, 'compareDepartmentsDescending']);
+                }
+            }
+        }
         for ($x = $start; $x < $start + $rows; $x++) {
             if (!isset($allDepartments[$x]))
                 break;
             $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
-            $s .= "<cell>" . $allDepartments[$x]->getRegionId() . "</cell>";
+            $EntityManager = $this
+                    ->getServiceLocator()
+                    ->get('Doctrine\ORM\EntityManager');
+            $region_id = $EntityManager
+                    ->getRepository('Application\Entity\Regionxref')
+                    ->findOneBy(['r5wRegionpky' => $allDepartments[$x]->getRegionId()])
+                    ->getR5wRegionname();
+//            error_log('region object?' . $region_id . '|' . $allDepartments[$x]->getRegionId());
+            $s .= "<cell>" . $region_id . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
             $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
             $s .= "</row>";
@@ -456,21 +487,27 @@ class UserAdminController extends AbstractActionController {
         return $response;
     }
 
-    public function getAllClients($region) {
+    public function getAllClients($regions) {
 
-        $EntityManager = $this
-                ->getServiceLocator()
-                ->get('Doctrine\ORM\EntityManager');
-        $region_id = $EntityManager
-                ->getRepository('Application\Entity\Regionxref')
-                ->findOneBy(['r5wRegionname' => $region])
-                ->getR5wRegionpky();
+        foreach ($regions as $region) {
 
-        $departments = $EntityManager
-                ->getRepository('Application\Entity\Client')
-                ->findBy(['parent' => null, 'region_id' => $region_id]);
 
-        return $departments;
+            $EntityManager = $this
+                    ->getServiceLocator()
+                    ->get('Doctrine\ORM\EntityManager');
+            $region_id = $EntityManager
+                    ->getRepository('Application\Entity\Regionxref')
+                    ->findOneBy(['r5wRegionname' => $region])
+                    ->getR5wRegionpky();
+
+            $departments = $EntityManager
+                    ->getRepository('Application\Entity\Client')
+                    ->findBy(['parent' => null, 'region_id' => $region_id]);
+            foreach ($departments as $department) {
+                $return[] = $department;
+            }
+        }
+        return $return;
     }
 
     public function getUserAvailableClientsAction() {
@@ -598,7 +635,9 @@ class UserAdminController extends AbstractActionController {
     }
 
     public function getRegionsAction() {
-        
+
+        $this->_session = new Container($this->_namespace);
+        unset($this->_session['multi-region']);
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $EntityManager = $this
