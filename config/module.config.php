@@ -145,6 +145,28 @@ return array(
                                 ),
                                 'mayterminate' => true,
                             ),
+                            'getavailableregions' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getavailableregions',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getavailableregions',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
+                            'getselectedregions' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getselectedregions',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getselectedregions',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
                         ),
                     ),
                 ),
