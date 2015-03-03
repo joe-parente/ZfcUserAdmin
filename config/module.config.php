@@ -167,6 +167,17 @@ return array(
                                 ),
                                 'mayterminate' => true,
                             ),
+                            'getavailableparents' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getavailableparents',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getavailableparents',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
                         ),
                     ),
                 ),
