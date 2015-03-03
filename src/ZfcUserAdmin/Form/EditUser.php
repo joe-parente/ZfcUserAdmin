@@ -225,6 +225,30 @@ class EditUser extends Register {
                 'type' => 'hidden'
             ),
         ));
+        $this->add([
+            'type' => 'Zend\Form\Element\Hidden',
+            'name' => 'parent_list',
+            'attributes' => [
+                'value' => '',
+                'id' => 'parent_list',
+            ],
+        ]);
+        $this->add([
+            'type' => 'Zend\Form\Element\Hidden',
+            'name' => 'department_list',
+            'attributes' => [
+                'value' => '',
+                'id' => 'department_list',
+            ],
+        ]);
+        $this->add([
+            'type' => 'Zend\Form\Element\Hidden',
+            'name' => 'region_list',
+            'attributes' => [
+                'value' => '',
+                'id' => 'region_list',
+            ],
+        ]);
     }
 
     public function setUser($userEntity) {

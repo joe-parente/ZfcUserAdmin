@@ -1015,8 +1015,8 @@ class UserAdminController extends AbstractActionController {
                 ->findBy(['parent' => $parentList]);
 
         $allDepartments = [];
-        foreach ($availableDepartments as $dept) {
-            foreach ($departmentList as $selected) {
+        foreach ($departmentList as $selected) {
+            foreach ($availableDepartments as $dept) {
                 if ($dept->getId() != $selected) {
                     $allDepartments[] = $dept;
                 }
