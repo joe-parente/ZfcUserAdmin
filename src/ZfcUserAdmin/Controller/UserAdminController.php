@@ -472,7 +472,6 @@ class UserAdminController extends AbstractActionController {
                     ->getRepository('Application\Entity\Regionxref')
                     ->findOneBy(['r5wRegionpky' => $allDepartments[$x]->getRegionId()])
                     ->getR5wRegionname();
-//            error_log('region object?' . $region_id . '|' . $allDepartments[$x]->getRegionId());
             $s .= "<cell>" . $region_id . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
             $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
@@ -524,9 +523,22 @@ class UserAdminController extends AbstractActionController {
                 ->getRepository('Application\Entity\User')
                 ->findOneBy(['id' => $userId]);
 
-        $region = $user->getClients()[0]->getRegionId();
+        $userclients = $user->getClients();
+        foreach ($userclients as $client) {
+            $region = $EntityManager
+                    ->getRepository('Application\Entity\Regionxref')
+                    ->findOneBy(['r5wRegionpky' => $client->getRegionId()]);
+            $regionList[] = $region->getR5wRegionname();
+        }
+        $allClients = $this->getAllClients($regionList);
 
-        $allDepartments = $this->getAllClients($region);
+        foreach ($allClients as $client) {
+            foreach ($userclients as $selected) {
+                if ($client->getId() != $selected->getId()) {
+                    $allDepartments[] = $client;
+                }
+            }
+        }
 
         $count = count($allDepartments);
         $rows = $parms['rows'];
@@ -558,6 +570,11 @@ class UserAdminController extends AbstractActionController {
             if (!isset($allDepartments[$x]))
                 break;
             $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $region_id = $EntityManager
+                    ->getRepository('Application\Entity\Regionxref')
+                    ->findOneBy(['r5wRegionpky' => $allDepartments[$x]->getRegionId()])
+                    ->getR5wRegionname();
+            $s .= "<cell>" . $region_id . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
             $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
             $s .= "</row>";
@@ -585,8 +602,10 @@ class UserAdminController extends AbstractActionController {
                 ->getRepository('Application\Entity\User')
                 ->findOneBy(['id' => $userId]);
 
-        $allDepartments = $user->getClients();
-
+        $allClients = $user->getClients();
+        foreach ($allClients as $client) {
+            $allDepartments[] = $client->getParent();
+        }
         $count = count($allDepartments);
         $rows = $parms['rows'];
         $total_pages = ceil($count / $rows);
@@ -617,6 +636,11 @@ class UserAdminController extends AbstractActionController {
             if (!isset($allDepartments[$x]))
                 break;
             $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $region_id = $EntityManager
+                    ->getRepository('Application\Entity\Regionxref')
+                    ->findOneBy(['r5wRegionpky' => $allDepartments[$x]->getRegionId()])
+                    ->getR5wRegionname();
+            $s .= "<cell>" . $region_id . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
             $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
             $s .= "</row>";
@@ -835,6 +859,72 @@ class UserAdminController extends AbstractActionController {
         return $response;
     }
 
+    public function getUserSelectedDepartmentsAction() {
+        $this->_session = new Container($this->_namespace);
+        unset($this->_session['multi-region']);
+        $parms = ($this->params()->fromQuery());
+        $page = $parms['page'];
+        $userid = $this->_session['user'];
+
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $user = $EntityManager
+                ->getRepository('Application\Entity\User')
+                ->findOneBy(['id' => $userid]);
+        $regions = $this->getUserRegions($user);
+
+        $allDepartments = $user->getClients();
+//        foreach ($allClients as $dept) {
+//            if (!in_array($dept->getRegionId(), $regions)) {
+//                $allDepartments[] = $dept;
+//            }
+//        }
+
+        $count = count($allDepartments);
+        $rows = $parms['rows'];
+        $total_pages = ceil($count / $rows);
+
+        $s = "<?xml version='1.0' encoding='utf-8'?>";
+        $s .= "<rows>";
+        $s .= "<page>" . $page . "</page>";
+        $s .= "<total>" . $total_pages . "</total>";
+        $s .= "<records>" . $count . "</records>";
+
+        $start = (($page - 1) * $rows);
+
+        if ($parms['_search'] === 'true') {
+            $filteredIssues = array_filter($allDepartments, function($e) {
+
+                $parms = ($this->params()->fromQuery());
+                $searchFunction = 'get' . $parms['searchField'];
+                if ($this->matchElement($parms['searchString'], $e->$searchFunction(), $parms['searchOper'])) {
+                    return $e;
+                }
+            });
+            $allDepartments = array_values($filteredIssues);
+            $start = 0;
+            $rows = 5000;
+        }
+
+        for ($x = $start; $x < $start + $rows; $x++) {
+            if (!isset($allDepartments[$x]))
+                break;
+            $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $s .= "<cell>" . $allDepartments[$x]->getParentName() . "</cell>";
+            $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
+            $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
+            $s .= "</row>";
+        }
+        $s .= "</rows>";
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'application/xml');
+        $response->setStatusCode(200);
+        $response->setContent($s);
+
+        return $response;
+    }
+
     public function getAvailableParentsAction() {
         $this->_session = new Container($this->_namespace);
         unset($this->_session['multi-region']);
@@ -890,6 +980,87 @@ class UserAdminController extends AbstractActionController {
             $s .= "<row id='" . $allDepartments[$x]->getPky() . "'>";
             $s .= "<cell>" . $allDepartments[$x]->getR5wRegionname() . "</cell>";
             $s .= "<cell><![CDATA[" . $allDepartments[$x]->getCompanyname() . "]]></cell>";
+            $s .= "</row>";
+        }
+        $s .= "</rows>";
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'application/xml');
+        $response->setStatusCode(200);
+        $response->setContent($s);
+
+        return $response;
+    }
+
+    public function getUserAvailableDepartmentsAction() {
+        $this->_session = new Container($this->_namespace);
+        unset($this->_session['multi-region']);
+        $parms = ($this->params()->fromQuery());
+        $page = $parms['page'];
+        $userid = $this->_session['user'];
+
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $user = $EntityManager
+                ->getRepository('Application\Entity\User')
+                ->findOneBy(['id' => $userid]);
+        $selectedDepartments = $user->getClients();
+        foreach ($selectedDepartments as $dept) {
+            $parentList[] = $dept->getParent()->getId();
+            $departmentList[] = $dept->getId();
+        }
+        // die(var_dump($selectList));
+        $availableDepartments = $EntityManager
+                ->getRepository('Application\Entity\Client')
+                ->findBy(['parent' => $parentList]);
+
+        $allDepartments = [];
+        foreach ($availableDepartments as $dept) {
+            foreach ($departmentList as $selected) {
+                if ($dept->getId() != $selected) {
+                    $allDepartments[] = $dept;
+                }
+            }
+        }
+//        foreach ($allClients as $dept) {
+//            if (!in_array($dept->getRegionId(), $regions)) {
+//                $allDepartments[] = $dept;
+//            }
+//        }
+
+        $count = count($allDepartments);
+        $rows = $parms['rows'];
+        $total_pages = ceil($count / $rows);
+
+        $s = "<?xml version='1.0' encoding='utf-8'?>";
+        $s .= "<rows>";
+        $s .= "<page>" . $page . "</page>";
+        $s .= "<total>" . $total_pages . "</total>";
+        $s .= "<records>" . $count . "</records>";
+
+        $start = (($page - 1) * $rows);
+
+        if ($parms['_search'] === 'true') {
+            $filteredIssues = array_filter($allDepartments, function($e) {
+
+                $parms = ($this->params()->fromQuery());
+                $searchFunction = 'get' . $parms['searchField'];
+                if ($this->matchElement($parms['searchString'], $e->$searchFunction(), $parms['searchOper'])) {
+                    return $e;
+                }
+            });
+            $allDepartments = array_values($filteredIssues);
+            $start = 0;
+            $rows = 5000;
+        }
+
+        for ($x = $start; $x < $start + $rows; $x++) {
+            if (!isset($allDepartments[$x]))
+                break;
+            $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $s .= "<cell>" . $allDepartments[$x]->getParentName() . "</cell>";
+            $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
+            $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
             $s .= "</row>";
         }
         $s .= "</rows>";

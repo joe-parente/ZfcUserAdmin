@@ -207,7 +207,18 @@ class EditUser extends Register {
         }
 
         $this->get('submit')->setLabel('Save')->setValue('Save');
-
+        $this->add([
+            'name' => 'cancel',
+            'type' => 'Zend\Form\Element\Button',
+            'attributes' => [
+                'onclick' => 'window.location = "/admin/user/list";',
+                'value' => 'Cancel',
+                'style' => 'display: inline;'
+            ],
+            'options' => [
+                'label' => 'Cancel',
+            ]
+        ]);
         $this->add(array(
             'name' => 'userId',
             'attributes' => array(

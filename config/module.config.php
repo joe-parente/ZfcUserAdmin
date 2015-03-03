@@ -178,6 +178,28 @@ return array(
                                 ),
                                 'mayterminate' => true,
                             ),
+                            'getuserselecteddepartments' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getuserselecteddepartments',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getuserselecteddepartments',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
+                            'getuseravailabledepartments' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getuseravailabledepartments',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getuseravailabledepartments',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
                         ),
                     ),
                 ),
