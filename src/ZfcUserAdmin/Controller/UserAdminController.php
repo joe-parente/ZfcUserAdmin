@@ -81,6 +81,8 @@ class UserAdminController extends AbstractActionController {
         $user = $this->getUserMapper()->findById($userId);
         $this->_session = new Container($this->_namespace);
         $this->_session['user'] = $user->getId();
+        unset($this->_session['multi-region']);
+
 
         /** @var $form \ZfcUserAdmin\Form\EditUser */
         $form = $this->getServiceLocator()->get('zfcuseradmin_edituser_form');
@@ -489,8 +491,9 @@ class UserAdminController extends AbstractActionController {
     public function getAllClients($regions) {
 
         foreach ($regions as $region) {
-
-
+            if (empty($region)) {
+                continue;
+            }
             $EntityManager = $this
                     ->getServiceLocator()
                     ->get('Doctrine\ORM\EntityManager');
@@ -515,7 +518,21 @@ class UserAdminController extends AbstractActionController {
         $page = $parms['page'];
         $this->_session = new Container($this->_namespace);
         $userId = $this->_session['user'];
+        if (isset($parms['region'])) {
+            $region = explode(',', $parms['region']);
+        } else {
+            $region = null;
+        }
 
+        $multiRegion = $this->_session['multi-region'];
+        if (!is_array($multiRegion) || !in_array($region, $multiRegion)) {
+            if (!is_null($region)) {
+                $multiRegion = $region;
+            }
+        }
+        //       $this->_session['multi-region'] = $multiRegion;
+        //echo 'Multi-region' . var_dump($multiRegion);
+        //     $allDepartments = $this->getAllClients($this->_session['multi-region']);
         $EntityManager = $this
                 ->getServiceLocator()
                 ->get('Doctrine\ORM\EntityManager');
@@ -524,13 +541,21 @@ class UserAdminController extends AbstractActionController {
                 ->findOneBy(['id' => $userId]);
 
         $userclients = $user->getClients();
+
         foreach ($userclients as $client) {
-            $region = $EntityManager
+            $userRegion = $EntityManager
                     ->getRepository('Application\Entity\Regionxref')
                     ->findOneBy(['r5wRegionpky' => $client->getRegionId()]);
-            $regionList[] = $region->getR5wRegionname();
+            $multiRegion[] = $userRegion->getR5wRegionname();
         }
-        $allClients = $this->getAllClients($regionList);
+
+//        if (!is_array($multiRegion) || !in_array($region, $multiRegion)) {
+//            if (!is_null($region)) {
+//                $multiRegion[] = $region;
+//            }
+//        }
+        $this->_session['multi-region'] = $multiRegion;
+        $allClients = $this->getAllClients($multiRegion);
 
         foreach ($allClients as $client) {
             foreach ($userclients as $selected) {

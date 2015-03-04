@@ -65,7 +65,9 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         $user->setParentClientId(explode(',', $data['parent_list']));
         $clients = array_unique(explode(',', $data['department_list']));
         foreach ($clients as $client) {
-            if ($client == null) {continue;}
+            if ($client == null) {
+                continue;
+            }
             $clientObj = $em->getRepository('Application\Entity\Client')->findOneBy(['id' => $client]);
             $user->addClient($clientObj);
         }
@@ -115,7 +117,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
 //            call_user_func(array($user, $this->getAccessorName($element)), $data[$element]);
 //        }
         //$sm = $e->getTarget()->getServiceManager();
-        
+
         $sm = $this->getServiceManager();
         $em = $sm->get('doctrine.entitymanager.orm_default');
 //        $oldRole = $user->getRoles();
@@ -124,9 +126,29 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
 //        }
         $criteria = array('id' => $data['roles']['0']);
         $userRole = $em->getRepository('Application\Entity\Role')->findOneBy($criteria);
+
         $user->addRole($userRole);
-        $user->setParentClientId($data['parentclientid']);
-        $user->setModifiedDateTime (new \DateTime());
+//        $user->setParentClientId($data['parentclientid']);
+        $user->setParentClientId(explode(',', $data['parent_list']));
+        $currentClients = $user->getClients();
+        $clients = array_unique(explode(',', $data['department_list']));
+        foreach ($clients as $client) {
+            foreach ($currentClients as $current) {
+                if ($current->getId() == $client) {
+                    continue;
+                } else {
+                    $filterClients[] = $client;
+                }
+            }
+        }
+        foreach ($filterClients as $client) {
+            if ($client == null) {
+                continue;
+            }
+            $clientObj = $em->getRepository('Application\Entity\Client')->findOneBy(['id' => $client]);
+            $user->addClient($clientObj);
+        }
+        $user->setModifiedDateTime(new \DateTime());
         $argv += array('user' => $user, 'form' => $form, 'data' => $data);
 
         $this->getEventManager()->trigger(__FUNCTION__, $this, $argv);
