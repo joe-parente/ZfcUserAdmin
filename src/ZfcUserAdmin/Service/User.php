@@ -130,17 +130,28 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         $user->addRole($userRole);
 //        $user->setParentClientId($data['parentclientid']);
         $user->setParentClientId(explode(',', $data['parent_list']));
-        $currentClients = $user->getClients();
+
         $clients = array_unique(explode(',', $data['department_list']));
-        foreach ($clients as $client) {
-            foreach ($currentClients as $current) {
-                if ($current->getId() == $client) {
-                    continue;
-                } else {
-                    $filterClients[] = $client;
-                }
+        $currentClients = $user->getClients();
+        foreach ($currentClients as $client) {
+            $clientList[] = $client->getId();
+        }
+
+        foreach ($clients as $newClient) {
+            if (!in_array($newClient, $clientList)) {
+                $filterClients[] = $newClient;
             }
         }
+        
+//        $filterClients = $user->getClients()->filter(
+//                function($entry) use ($clientList) {
+//                    if (in_array($entry->getId(), $clientList)) {
+//                        return false;
+//                    }
+//                    return true;
+//                    }
+//        );
+
         foreach ($filterClients as $client) {
             if ($client == null) {
                 continue;

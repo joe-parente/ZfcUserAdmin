@@ -554,16 +554,23 @@ class UserAdminController extends AbstractActionController {
 //                $multiRegion[] = $region;
 //            }
 //        }
-        $this->_session['multi-region'] = $multiRegion;
-        $allClients = $this->getAllClients($multiRegion);
+        $this->_session['multi-region'] = array_unique($multiRegion);
+        $allClients = $this->getAllClients(array_unique($multiRegion));
 
-        foreach ($allClients as $client) {
-            foreach ($userclients as $selected) {
-                if ($client->getId() != $selected->getId()) {
-                    $allDepartments[] = $client;
+
+
+        foreach ($userclients as $client) {
+            foreach ($allClients as $availableClient) {
+
+
+                if ($client->getParent()->getId() == $availableClient->getId()) {
+                    
+                } else {
+                    $allDepartments[] = $availableClient;
                 }
             }
         }
+
 
         $count = count($allDepartments);
         $rows = $parms['rows'];
@@ -629,8 +636,9 @@ class UserAdminController extends AbstractActionController {
 
         $allClients = $user->getClients();
         foreach ($allClients as $client) {
-            $allDepartments[] = $client->getParent();
+            $badDepartments[] = $client->getParent();
         }
+        $allDepartments = array_unique($badDepartments);
         $count = count($allDepartments);
         $rows = $parms['rows'];
         $total_pages = ceil($count / $rows);
@@ -659,7 +667,7 @@ class UserAdminController extends AbstractActionController {
 
         for ($x = $start; $x < $start + $rows; $x++) {
             if (!isset($allDepartments[$x]))
-                break;
+                continue;
             $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
             $region_id = $EntityManager
                     ->getRepository('Application\Entity\Regionxref')
@@ -899,13 +907,18 @@ class UserAdminController extends AbstractActionController {
                 ->findOneBy(['id' => $userid]);
         $regions = $this->getUserRegions($user);
 
-        $allDepartments = $user->getClients();
-//        foreach ($allClients as $dept) {
-//            if (!in_array($dept->getRegionId(), $regions)) {
-//                $allDepartments[] = $dept;
-//            }
-//        }
 
+        if (isset($parms['parent'])) {
+            $parentsList = $parms['parent'];
+            $allDepartments[] = $EntityManager
+                    ->getRepository('Application\Entity\Client')
+                    ->findOneBy(['parent' => $parentsList]);
+        }
+        $clientDepartments = $user->getClients();
+
+        foreach ($clientDepartments as $client) {
+            $allDepartments[] = $client;
+        }
         $count = count($allDepartments);
         $rows = $parms['rows'];
         $total_pages = ceil($count / $rows);
@@ -1037,14 +1050,13 @@ class UserAdminController extends AbstractActionController {
         // die(var_dump($selectList));
         $availableDepartments = $EntityManager
                 ->getRepository('Application\Entity\Client')
-                ->findBy(['parent' => $parentList]);
+                ->findBy(['parent' => array_unique($parentList)]);
 
         $allDepartments = [];
-        foreach ($departmentList as $selected) {
-            foreach ($availableDepartments as $dept) {
-                if ($dept->getId() != $selected) {
-                    $allDepartments[] = $dept;
-                }
+        foreach ($availableDepartments as $available) {
+
+            if (!in_array($available->getId(), $departmentList)) {
+                $allDepartments[] = $dept;
             }
         }
 //        foreach ($allClients as $dept) {
