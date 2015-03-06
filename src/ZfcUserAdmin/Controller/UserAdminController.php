@@ -414,12 +414,32 @@ class UserAdminController extends AbstractActionController {
         return strcmp($b->getName(), $a->getName());
     }
 
+    public function compareIdsDescending($a, $b) {
+        return strcmp($b->getId(), $a->getId());
+    }
+
+    public function compareIdsAscending($a, $b) {
+        return strcmp($a->getId(), $b->getId());
+    }
+
+    public function compareGenericAscending($a, $b, $field) {
+        $methodName = 'get' . $field;
+        return strcmp($a->$methodName(), $b->$methodName());
+    }
+
+    public function compareGenericDescending($a, $b, $field) {
+        $methodName = 'get' . $field;
+        return strcmp($b->$methodName(), $a->$methodName());
+    }
+
     public function getAllClientsAction() {
 
         $this->_session = new Container($this->_namespace);
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $region = $parms['region'];
+        $sortIndex = $parms['sidx'];
+        $sortOrder = $parms['sord'];
         $multiRegion = $this->_session['multi-region'];
         if (!is_array($multiRegion) || !in_array($region, $multiRegion)) {
             $multiRegion[] = $region;
@@ -583,7 +603,15 @@ class UserAdminController extends AbstractActionController {
         $s .= "<records>" . $count . "</records>";
 
         $start = (($page - 1) * $rows);
-
+        if (isset($parms['sidx'])) {
+            if (isset($parms['sord'])) {
+                if ($parms['sord'] == 'asc') {
+                    usort($allDepartments, [$this, 'compareDepartmentsAscending']);
+                } else {
+                    usort($allDepartments, [$this, 'compareDepartmentsDescending']);
+                }
+            }
+        }
         if ($parms['_search'] === 'true') {
             $filteredIssues = array_filter($allDepartments, function($e) {
 
@@ -1106,6 +1134,80 @@ class UserAdminController extends AbstractActionController {
         $response->setStatusCode(200);
         $response->setContent($s);
 
+        return $response;
+    }
+
+    public function getUserListAction() {
+
+        $parms = ($this->params()->fromQuery());
+        $page = $parms['page'];
+        $sortIndex = $parms['sidx'];
+        $sortDirection = $parms['sord'];
+
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+
+        if (!isset($sortIndex)) {
+            $sortIndex = 'Id';
+        }
+        
+        if (!isset($sortDirection)) {
+            $sortDirection = 'asc';
+        }
+
+        $allUsers = $EntityManager
+                ->getRepository('Application\Entity\User')
+                ->findBy([], [$sortIndex => $sortDirection]);
+
+        $count = count($allUsers);
+        $rows = $parms['rows'];
+        $total_pages = ceil($count / $rows);
+
+        $s = "<?xml version='1.0' encoding='utf-8'?>";
+        $s .= "<rows>";
+        $s .= "<page>" . $page . "</page>";
+        $s .= "<total>" . $total_pages . "</total>";
+        $s .= "<records>" . $count . "</records>";
+
+        $start = (($page - 1) * $rows);
+
+        if ($parms['_search'] === 'true') {
+            $filteredIssues = array_filter($allUsers, function($e) {
+
+                $parms = ($this->params()->fromQuery());
+                $searchFunction = 'get' . $parms['searchField'];
+                if ($this->matchElement($parms['searchString'], $e->$searchFunction(), $parms['searchOper'])) {
+                    return $e;
+                }
+            });
+            $allUsers = array_values($filteredIssues);
+            $start = 0;
+            $rows = 5000;
+        }
+
+        for ($x = $start; $x < $start + $rows; $x++) {
+            if (!isset($allUsers[$x]))
+                break;
+            $s .= "<row id='" . $allUsers[$x]->getId() . "'>";
+            $s .= "<cell>" . $allUsers[$x]->getId() . "</cell>";
+            $s .= "<cell>" . $allUsers[$x]->getFirstName() . "</cell>";
+            $s .= "<cell>" . $allUsers[$x]->getLastName() . "</cell>";
+            $s .= "<cell><![CDATA[" . $allUsers[$x]->getEmail() . "]]></cell>";
+            $s .= "<cell><![CDATA[" . $allUsers[$x]->getParentClientId() . "]]></cell>";
+            $s .= "<cell><![CDATA[" . $allUsers[$x]->getParentName() . "]]></cell>";
+            $s .= "<cell><![CDATA[" . $allUsers[$x]->getLastLoginDate() . "]]></cell>";
+            $s .= "<cell><![CDATA[" . $allUsers[$x]->getRoles()->getRoleId() . "]]></cell>";
+            $link = '<a href="/admin/user/edit/' . $allUsers[$x]->getId() . '">Edit</a>|<a onclick="return confirm(\'Really delete user?\')" href="/admin/user/remove/' . $allUsers[$x]->getId() . '">Delete</a>';
+            $s .= "<cell><![CDATA[" . $link . "]]></cell>";
+            $s .= "</row>";
+        }
+        $s .= "</rows>";
+
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'application/xml');
+        $response->setStatusCode(200);
+        $response->setContent($s);
         return $response;
     }
 

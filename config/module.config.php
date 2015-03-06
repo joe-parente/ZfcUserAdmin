@@ -200,6 +200,17 @@ return array(
                                 ),
                                 'mayterminate' => true,
                             ),
+                            'getuserlist' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getuserlist',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getuserlist',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
                         ),
                     ),
                 ),
