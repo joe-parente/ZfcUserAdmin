@@ -247,6 +247,15 @@ class UserAdminController extends AbstractActionController {
                 break;
 
             $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $EntityManager = $this
+                    ->getServiceLocator()
+                    ->get('Doctrine\ORM\EntityManager');
+
+            $region_id = $EntityManager
+                    ->getRepository('Application\Entity\Regionxref')
+                    ->findOneBy(['r5wRegionpky' => $allDepartments[$x]->getRegionId()])
+                    ->getR5wRegionname();
+            $s .= "<cell>" . $region_id . "</cell>";
             $s .= "<cell><![CDATA[" . $allDepartments[$x]->getParent()->getName() . "]]></cell>";
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
             $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
@@ -330,6 +339,11 @@ class UserAdminController extends AbstractActionController {
             } else {
                 $s .= "<cell>" . false . "</cell>";
             }
+            $region_id = $EntityManager
+                    ->getRepository('Application\Entity\Regionxref')
+                    ->findOneBy(['r5wRegionpky' => $allDepartments[$x]->getRegionId()])
+                    ->getR5wRegionname();
+            $s .= "<cell>" . $region_id . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
             $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
             $s .= "</row>";
@@ -977,6 +991,11 @@ class UserAdminController extends AbstractActionController {
             if (!isset($allDepartments[$x]))
                 break;
             $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $region_id = $EntityManager
+                    ->getRepository('Application\Entity\Regionxref')
+                    ->findOneBy(['r5wRegionpky' => $allDepartments[$x]->getRegionId()])
+                    ->getR5wRegionname();
+            $s .= "<cell>" . $region_id . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getParentName() . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
             $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
@@ -1123,6 +1142,11 @@ class UserAdminController extends AbstractActionController {
             if (!isset($allDepartments[$x]))
                 break;
             $s .= "<row id='" . $allDepartments[$x]->getId() . "'>";
+            $region_id = $EntityManager
+                    ->getRepository('Application\Entity\Regionxref')
+                    ->findOneBy(['r5wRegionpky' => $allDepartments[$x]->getRegionId()])
+                    ->getR5wRegionname();
+            $s .= "<cell>" . $region_id . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getParentName() . "</cell>";
             $s .= "<cell>" . $allDepartments[$x]->getId() . "</cell>";
             $s .= "<cell><![CDATA[" . $allDepartments[$x]->getName() . "]]></cell>";
@@ -1151,7 +1175,7 @@ class UserAdminController extends AbstractActionController {
         if (!isset($sortIndex)) {
             $sortIndex = 'Id';
         }
-        
+
         if (!isset($sortDirection)) {
             $sortDirection = 'asc';
         }
