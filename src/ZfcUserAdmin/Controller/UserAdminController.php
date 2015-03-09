@@ -46,7 +46,10 @@ class UserAdminController extends AbstractActionController {
 
     public function createAction() {
 
-
+        $this->_session = new Container($this->_namespace);
+        unset($this->_session['multi-region']);
+        unset($this->_session['multi-parent']);
+        unset($this->_session['multi-department']);
         /** @var $form \ZfcUserAdmin\Form\CreateUser */
         $form = $this->getServiceLocator()->get('zfcuseradmin_createuser_form');
         $request = $this->getRequest();
@@ -187,13 +190,10 @@ class UserAdminController extends AbstractActionController {
     public function getDepartmentsAction() {
 
         $this->_session = new Container($this->_namespace);
-
-
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $rows = $parms['rows'];
         $parent = $parms['parent'];
-
         $this->_session['multi-clients'][] = $parent;
         $allDepartments = $this->getDepartmentList($this->_session['multi-clients']);
         if (($parms['user'] != 'undefined')) {
@@ -731,8 +731,6 @@ class UserAdminController extends AbstractActionController {
 
     public function getRegionsAction() {
 
-        $this->_session = new Container($this->_namespace);
-        unset($this->_session['multi-region']);
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $EntityManager = $this
@@ -949,6 +947,7 @@ class UserAdminController extends AbstractActionController {
                 ->findOneBy(['id' => $userid]);
         $regions = $this->getUserRegions($user);
 
+        
 
         if (isset($parms['parent'])) {
             $parentsList = $parms['parent'];
@@ -1215,8 +1214,9 @@ class UserAdminController extends AbstractActionController {
                 break;
             $s .= "<row id='" . $allUsers[$x]->getId() . "'>";
             $s .= "<cell>" . $allUsers[$x]->getId() . "</cell>";
-            $s .= "<cell>" . $allUsers[$x]->getFirstName() . "</cell>";
-            $s .= "<cell>" . $allUsers[$x]->getLastName() . "</cell>";
+            $s .= "<cell><![CDATA[" . $allUsers[$x]->getBillingContact() . "]]></cell>";
+            $s .= "<cell><![CDATA[" . $allUsers[$x]->getFirstName() . "]]></cell>";
+            $s .= "<cell><![CDATA[" . $allUsers[$x]->getLastName() . "]]></cell>";
             $s .= "<cell><![CDATA[" . $allUsers[$x]->getEmail() . "]]></cell>";
             $s .= "<cell><![CDATA[" . $allUsers[$x]->getParentClientId() . "]]></cell>";
             $s .= "<cell><![CDATA[" . $allUsers[$x]->getParentName() . "]]></cell>";

@@ -72,6 +72,7 @@ class EditUser extends Register {
                     ),
                     'options' => array(
                         'label' => 'Suspended:',
+                        'label_attributes' => 'style="margin-right: 1em'
                     ),
                 )
         );
@@ -219,7 +220,26 @@ class EditUser extends Register {
                 'label' => 'Cancel',
             ]
         ]);
+        /*
+//        <a style="color: red;" href="<?php echo $this->url('zfcadmin/zfcuseradmin/remove', array('userId' => $this->userId)); ?>"
+//
+//</a>
+         * */
+     
+        $this->add([
+            'name' => 'delete',
+            'type' => 'Zend\Form\Element\Button',
+            'attributes' => [
+                'onclick' => "confirmRemove('/admin/user/remove/' + $(\"input[name='userId']\").val())",
+                'value' => 'Delete this User',
+                'style' => 'display: inline;'
+            ],
+            'options' => [
+                'label' => 'Delete This User',
+            ]
+        ]);
         $this->add(array(
+            'type' => 'Zend\Form\Element\Hidden',
             'name' => 'userId',
             'attributes' => array(
                 'type' => 'hidden'
