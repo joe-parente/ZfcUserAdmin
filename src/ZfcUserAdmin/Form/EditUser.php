@@ -72,7 +72,7 @@ class EditUser extends Register {
                     ),
                     'options' => array(
                         'label' => 'Suspended:',
-                        'label_attributes' => 'style="margin-right: 1em'
+                        'label_attributes' => ['style="margin-right: 1em']
                     ),
                 )
         );
