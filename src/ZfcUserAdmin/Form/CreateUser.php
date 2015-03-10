@@ -153,6 +153,14 @@ class CreateUser extends Register {
 //        );
         $this->add([
             'type' => 'Zend\Form\Element\Hidden',
+            'name' => 'region_list',
+            'attributes' => [
+                'value' => '',
+                'id' => 'region_list',
+            ],
+        ]);
+        $this->add([
+            'type' => 'Zend\Form\Element\Hidden',
             'name' => 'parent_list',
             'attributes' => [
                 'value' => '',

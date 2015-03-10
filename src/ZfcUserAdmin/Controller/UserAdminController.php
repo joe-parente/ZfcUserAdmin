@@ -26,7 +26,7 @@ class UserAdminController extends AbstractActionController {
     public function listAction() {
 
         $this->_session = new Container($this->_namespace);
-        $this->_session['multi-clients'] = [];
+        
 
         $userMapper = $this->getUserMapper();
         $users = $userMapper->findAll();
@@ -47,9 +47,7 @@ class UserAdminController extends AbstractActionController {
     public function createAction() {
 
         $this->_session = new Container($this->_namespace);
-        unset($this->_session['multi-region']);
-        unset($this->_session['multi-parent']);
-        unset($this->_session['multi-department']);
+
         /** @var $form \ZfcUserAdmin\Form\CreateUser */
         $form = $this->getServiceLocator()->get('zfcuseradmin_createuser_form');
         $request = $this->getRequest();
@@ -84,7 +82,7 @@ class UserAdminController extends AbstractActionController {
         $user = $this->getUserMapper()->findById($userId);
         $this->_session = new Container($this->_namespace);
         $this->_session['user'] = $user->getId();
-        unset($this->_session['multi-region']);
+
 
 
         /** @var $form \ZfcUserAdmin\Form\EditUser */
@@ -193,9 +191,13 @@ class UserAdminController extends AbstractActionController {
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $rows = $parms['rows'];
-        $parent = $parms['parent'];
-        $this->_session['multi-clients'][] = $parent;
-        $allDepartments = $this->getDepartmentList($this->_session['multi-clients']);
+        //       $parent = $parms['parent'];
+        if (isset($parms['parent'])) {
+            $parents = explode(',', $parms['parent']);
+        } else {
+            $parents = null;
+        }
+        $allDepartments = $this->getDepartmentList($parents);
         if (($parms['user'] != 'undefined')) {
             $userDepartments = $this->getUserDepartments($parms['user']);
         } else {
@@ -267,7 +269,10 @@ class UserAdminController extends AbstractActionController {
 
     public function getDepartmentList($parent) {
 
-        foreach ($parent as $each) {
+        $newParent = array_unique($parent);
+        $return = [];
+
+        foreach ($newParent as $each) {
             $EntityManager = $this
                     ->getServiceLocator()
                     ->get('Doctrine\ORM\EntityManager');
@@ -451,16 +456,15 @@ class UserAdminController extends AbstractActionController {
         $this->_session = new Container($this->_namespace);
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
-        $region = $parms['region'];
+
+        if (isset($parms['region'])) {
+            $region = explode(',', $parms['region']);
+        } else {
+            $region = [];
+        }
         $sortIndex = $parms['sidx'];
         $sortOrder = $parms['sord'];
-        $multiRegion = $this->_session['multi-region'];
-        if (!is_array($multiRegion) || !in_array($region, $multiRegion)) {
-            $multiRegion[] = $region;
-        }
-        $this->_session['multi-region'] = $multiRegion;
-        //echo 'Multi-region' . var_dump($multiRegion);
-        $allDepartments = $this->getAllClients($this->_session['multi-region']);
+        $allDepartments = $this->getAllClients($region);
 
 
         $count = count($allDepartments);
@@ -524,6 +528,8 @@ class UserAdminController extends AbstractActionController {
 
     public function getAllClients($regions) {
 
+        $return = [];
+        
         foreach ($regions as $region) {
             if (empty($region)) {
                 continue;
@@ -796,7 +802,7 @@ class UserAdminController extends AbstractActionController {
 
     public function getAvailableRegionsAction() {
         $this->_session = new Container($this->_namespace);
-        unset($this->_session['multi-region']);
+        
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
@@ -865,7 +871,7 @@ class UserAdminController extends AbstractActionController {
 
     public function getSelectedRegionsAction() {
         $this->_session = new Container($this->_namespace);
-        unset($this->_session['multi-region']);
+        
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
@@ -934,7 +940,7 @@ class UserAdminController extends AbstractActionController {
 
     public function getUserSelectedDepartmentsAction() {
         $this->_session = new Container($this->_namespace);
-        unset($this->_session['multi-region']);
+        
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
@@ -947,7 +953,7 @@ class UserAdminController extends AbstractActionController {
                 ->findOneBy(['id' => $userid]);
         $regions = $this->getUserRegions($user);
 
-        
+
 
         if (isset($parms['parent'])) {
             $parentsList = $parms['parent'];
@@ -1011,7 +1017,7 @@ class UserAdminController extends AbstractActionController {
 
     public function getAvailableParentsAction() {
         $this->_session = new Container($this->_namespace);
-        unset($this->_session['multi-region']);
+        
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
@@ -1077,7 +1083,7 @@ class UserAdminController extends AbstractActionController {
 
     public function getUserAvailableDepartmentsAction() {
         $this->_session = new Container($this->_namespace);
-        unset($this->_session['multi-region']);
+        
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
@@ -1214,7 +1220,7 @@ class UserAdminController extends AbstractActionController {
                 break;
             $s .= "<row id='" . $allUsers[$x]->getId() . "'>";
             $s .= "<cell>" . $allUsers[$x]->getId() . "</cell>";
-            $s .= "<cell><![CDATA[" . $allUsers[$x]->getBillingContact() . "]]></cell>";
+            $s .= "<cell><![CDATA[" . $allUsers[$x]->getBillingContactKey() . "]]></cell>";
             $s .= "<cell><![CDATA[" . $allUsers[$x]->getFirstName() . "]]></cell>";
             $s .= "<cell><![CDATA[" . $allUsers[$x]->getLastName() . "]]></cell>";
             $s .= "<cell><![CDATA[" . $allUsers[$x]->getEmail() . "]]></cell>";
