@@ -26,7 +26,7 @@ class UserAdminController extends AbstractActionController {
     public function listAction() {
 
         $this->_session = new Container($this->_namespace);
-        
+
 
         $userMapper = $this->getUserMapper();
         $users = $userMapper->findAll();
@@ -529,7 +529,7 @@ class UserAdminController extends AbstractActionController {
     public function getAllClients($regions) {
 
         $return = [];
-        
+
         foreach ($regions as $region) {
             if (empty($region)) {
                 continue;
@@ -546,7 +546,7 @@ class UserAdminController extends AbstractActionController {
                     ->getRepository('Application\Entity\Client')
                     ->findBy(['parent' => null, 'region_id' => $region_id]);
             foreach ($departments as $department) {
-                $return[] = $department;
+                $return[$department->getId()] = $department;
             }
         }
         return $return;
@@ -559,20 +559,11 @@ class UserAdminController extends AbstractActionController {
         $this->_session = new Container($this->_namespace);
         $userId = $this->_session['user'];
         if (isset($parms['region'])) {
-            $region = explode(',', $parms['region']);
+            $regions = explode(',', $parms['region']);
         } else {
-            $region = null;
+            $regions = [];
         }
 
-        $multiRegion = $this->_session['multi-region'];
-        if (!is_array($multiRegion) || !in_array($region, $multiRegion)) {
-            if (!is_null($region)) {
-                $multiRegion = $region;
-            }
-        }
-        //       $this->_session['multi-region'] = $multiRegion;
-        //echo 'Multi-region' . var_dump($multiRegion);
-        //     $allDepartments = $this->getAllClients($this->_session['multi-region']);
         $EntityManager = $this
                 ->getServiceLocator()
                 ->get('Doctrine\ORM\EntityManager');
@@ -594,23 +585,19 @@ class UserAdminController extends AbstractActionController {
 //                $multiRegion[] = $region;
 //            }
 //        }
-        $this->_session['multi-region'] = array_unique($multiRegion);
-        $allClients = $this->getAllClients(array_unique($multiRegion));
+
+        $allClients = $this->getAllClients(array_unique(array_merge($regions, $multiRegion)));
 
 
 
         foreach ($userclients as $client) {
-            foreach ($allClients as $availableClient) {
 
+            if (array_key_exists($client->getParent()->getId(), $allClients)) {
 
-                if ($client->getParent()->getId() == $availableClient->getId()) {
-                    
-                } else {
-                    $allDepartments[] = $availableClient;
-                }
+                unset($allClients[$client->getParent()->getId()]);
             }
         }
-
+        $allDepartments = $allClients;
 
         $count = count($allDepartments);
         $rows = $parms['rows'];
@@ -802,7 +789,7 @@ class UserAdminController extends AbstractActionController {
 
     public function getAvailableRegionsAction() {
         $this->_session = new Container($this->_namespace);
-        
+
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
@@ -871,7 +858,7 @@ class UserAdminController extends AbstractActionController {
 
     public function getSelectedRegionsAction() {
         $this->_session = new Container($this->_namespace);
-        
+
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
@@ -940,7 +927,7 @@ class UserAdminController extends AbstractActionController {
 
     public function getUserSelectedDepartmentsAction() {
         $this->_session = new Container($this->_namespace);
-        
+
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
@@ -1017,7 +1004,7 @@ class UserAdminController extends AbstractActionController {
 
     public function getAvailableParentsAction() {
         $this->_session = new Container($this->_namespace);
-        
+
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
@@ -1083,7 +1070,7 @@ class UserAdminController extends AbstractActionController {
 
     public function getUserAvailableDepartmentsAction() {
         $this->_session = new Container($this->_namespace);
-        
+
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
