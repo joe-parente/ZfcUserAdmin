@@ -57,6 +57,7 @@ class EditUser extends Register {
                     ),
                     'options' => array(
                         'label' => 'User role',
+                        'label_attributes' => ['style' => 'margin-top: .3em;' ],
                         'object_manager' => $objectManager,
                         'target_class' => 'Application\Entity\Role',
                         'property' => 'roleId',
@@ -76,61 +77,6 @@ class EditUser extends Register {
                     ),
                 )
         );
-//        $this->add(array(
-//            'name' => 'parentclientid',
-//            'type' => 'Application\Form\Element\DtgAutocompleteElement',
-//            'options' => array(
-//                'label' => 'Parent Client',
-//                'sm' => $serviceManager,
-//                'property' => 'parentclientid',
-//            ),
-//            'attributes' => array(
-//                'required' => true,
-//                'class' => 'form-control input-sm',
-//                'style' => 'width: 150px;',
-//            )
-//        ));
-//        $this->add(
-//                array(
-//                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',
-//                    'name' => 'clients',
-//                    'attributes' => array(
-//                        'multiple' => true,
-//                    ),
-//                    'options' => array(
-//                        'object_manager' => $objectManager,
-//                        'target_class' => 'Application\Entity\Client',
-//                        'property' => 'id',
-//                        'is_method' => true,
-//                        'find_method' => array(
-//                            'name' => 'findBy',
-//                            'params' => array(
-//                                'criteria' => array(),
-//                                'orderBy' => ['id' => 'asc']
-//                            ),
-//                        )
-//                    )
-//        ));
-//                $this->add(
-//                array(
-//                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',
-//                    'name' => 'dapartments',
-//                    'attributes' => array(
-//                        'multiple' => false,
-//                    ),
-//                    'options' => array(
-//                        'object_manager' => $objectManager,
-//                        'target_class' => 'Application\Entity\Client',
-//                        'property' => 'name',
-//                        'is_method' => true,
-//                        'find_method' => array(
-//                            'name' => 'clientsByUser',
-//                            'params' => array(
-//                                'criteria' => array('id' => $parent),
-//                            ),
-//                        )
-//                    )
-//        ));
 
         foreach ($this->getUserEditOptions()->getEditFormElements() as $name => $element) {
             // avoid adding fields twice (e.g. email)
@@ -208,31 +154,29 @@ class EditUser extends Register {
         }
 
         $this->get('submit')->setLabel('Save')->setValue('Save');
+        
         $this->add([
             'name' => 'cancel',
             'type' => 'Zend\Form\Element\Button',
             'attributes' => [
                 'onclick' => 'window.location = "/admin/user/list";',
                 'value' => 'Cancel',
-                'style' => 'display: inline;'
+                'style' => 'display: inline; float: right; margin-right: 24em; margin-top: -1.825em;'
             ],
             'options' => [
                 'label' => 'Cancel',
-            ]
-        ]);
-        /*
-//        <a style="color: red;" href="<?php echo $this->url('zfcadmin/zfcuseradmin/remove', array('userId' => $this->userId)); ?>"
-//
-//</a>
-         * */
-     
+            ],
+                ], [
+            'priority' => -1000,]
+        );
+
         $this->add([
             'name' => 'delete',
             'type' => 'Zend\Form\Element\Button',
             'attributes' => [
                 'onclick' => "confirmRemove('/admin/user/remove/' + $(\"input[name='userId']\").val())",
                 'value' => 'Delete this User',
-                'style' => 'display: inline;'
+                'style' => 'display: inline; float: right; margin-right: 10em; padding-left: -10em;'
             ],
             'options' => [
                 'label' => 'Delete This User',
