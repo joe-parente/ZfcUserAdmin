@@ -112,13 +112,14 @@ class CreateUser extends Register {
                     'name' => 'roles',
                     'attributes' => array(
                         'multiple' => false,
-                        'style' => 'margin: .7em;',
+                        'style' => 'margin: .5em;',
                     ),
                     'options' => array(
                         'object_manager' => $objectManager,
                         'target_class' => 'Application\Entity\Role',
                         'property' => 'roleId',
-                        'label' => 'Role:',
+                        'label' => 'User Role:',
+                        'label_attributes' => ['style' => 'margin-top: 0.7em'],
                     )
                 )
         );
@@ -127,7 +128,7 @@ class CreateUser extends Register {
                     'type' => 'Zend\Form\Element\Checkbox',
                     'name' => 'state',
                     'attributes' => array(
-                        'style' => 'display: inline;',
+                        'style' => 'display: block; margin-bottom: 1.0em;',
                     ),
                     'options' => array(
                         'label' => 'Suspended:',
