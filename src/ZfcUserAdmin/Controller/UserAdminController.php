@@ -931,6 +931,8 @@ class UserAdminController extends AbstractActionController {
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
+        $parentList = (isset($parms['parent']))?$parms['parent']:'';
+        $departmentList = (isset($parms['departments']))?explode(',', $parms['departments']): '';
 
         $EntityManager = $this
                 ->getServiceLocator()
@@ -938,17 +940,22 @@ class UserAdminController extends AbstractActionController {
         $user = $EntityManager
                 ->getRepository('Application\Entity\User')
                 ->findOneBy(['id' => $userid]);
-        $regions = $this->getUserRegions($user);
-
-
-
-        if (isset($parms['parent'])) {
-            $parentsList = $parms['parent'];
-            $allDepartments[] = $EntityManager
-                    ->getRepository('Application\Entity\Client')
-                    ->findOneBy(['parent' => $parentsList]);
+        $allDepartments = $EntityManager
+                ->getRepository('Application\Entity\Client')
+                ->findBy(['parent' => $parentList]);
+        if ($departmentList != '') {
+            foreach (array_unique($departmentList) as $department) {
+                
+                if (!is_null($department)) {
+                $clientDepartments[] = $EntityManager
+                        ->getRepository('Application\Entity\Client')
+                        ->findOneBy(['id' => $department]); 
+                }
+            }
+        } else {
+            $clientDepartments = $user->getClients();
+            
         }
-        $clientDepartments = $user->getClients();
 
         foreach ($clientDepartments as $client) {
             $allDepartments[] = $client;
