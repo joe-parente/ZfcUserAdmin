@@ -572,7 +572,7 @@ class UserAdminController extends AbstractActionController {
                 ->findOneBy(['id' => $userId]);
 
         $userclients = $user->getClients();
-
+        $multiRegion = [];
         foreach ($userclients as $client) {
             $userRegion = $EntityManager
                     ->getRepository('Application\Entity\Regionxref')
