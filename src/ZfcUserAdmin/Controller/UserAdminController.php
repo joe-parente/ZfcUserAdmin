@@ -1222,7 +1222,7 @@ class UserAdminController extends AbstractActionController {
             $s .= "<cell><![CDATA[" . $allUsers[$x]->getParentName() . "]]></cell>";
             $s .= "<cell><![CDATA[" . $allUsers[$x]->getLastLoginDate() . "]]></cell>";
             $s .= "<cell><![CDATA[" . $allUsers[$x]->getRoles()->getRoleId() . "]]></cell>";
-            $link = '<a href="/admin/user/edit/' . $allUsers[$x]->getId() . '">Edit</a>|<a onclick="return confirm(\'Really delete user?\')" href="/admin/user/remove/' . $allUsers[$x]->getId() . '">Delete</a>';
+            $link = '<a href="/admin/user/edit/' . $allUsers[$x]->getId() . '">Edit</a>&nbsp;|&nbsp;<a onclick="return confirm(\'Really delete user?\')" href="/admin/user/remove/' . $allUsers[$x]->getId() . '">Delete</a>';
             $s .= "<cell><![CDATA[" . $link . "]]></cell>";
             $s .= "</row>";
         }
