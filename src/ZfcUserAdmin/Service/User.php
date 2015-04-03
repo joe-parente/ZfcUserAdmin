@@ -101,7 +101,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         if ($this->getOptions()->getAllowPasswordChange()) {
             if (!empty($data['reset_password'])) {
                 $argv['password'] = $this->generatePassword();
-            } elseif (!empty($data['password'])) {
+            } elseif (!empty($data['password'] && $data['password'] != '')) {
                 $argv['password'] = $data['password'];
             }
 
@@ -112,23 +112,14 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
             }
         }
 
-//        // TODO: not sure if this code is required here - all fields that came from the form already saved
-//        foreach ($this->getOptions()->getEditFormElements() as $element) {
-//            call_user_func(array($user, $this->getAccessorName($element)), $data[$element]);
-//        }
-        //$sm = $e->getTarget()->getServiceManager();
-
         $sm = $this->getServiceManager();
         $em = $sm->get('doctrine.entitymanager.orm_default');
-//        $oldRole = $user->getRoles();
-//        foreach ($oldRole as $role) {
-//            $user->removeRole($role);
-//        }
+
         $criteria = array('id' => $data['roles']['0']);
         $userRole = $em->getRepository('Application\Entity\Role')->findOneBy($criteria);
 
         $user->addRole($userRole);
-//        $user->setParentClientId($data['parentclientid']);
+
         $user->setParentClientId(explode(',', $data['parent_list']));
 
         $newClients = array_unique(explode(',', $data['department_list']));
