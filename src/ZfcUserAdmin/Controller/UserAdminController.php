@@ -96,9 +96,14 @@ class UserAdminController extends AbstractActionController {
         if ($request->isPost()) {
             $form->setData($request->getPost());
             $tester = $user->getRoles();
+            $currentPassword = $user->getPassword();
             if ($form->isValid()) {
 
-                $user = $this->getAdminUserService()->edit($form, (array) $request->getPost(), $user);
+                if ($form->getData()->getPassword() == '') {
+                    error_log('password from form is empty');
+                }
+                
+                $user = $this->getAdminUserService()->edit($form, (array) $request->getPost(), $user, $currentPassword);
                 if ($user) {
                     $this->flashMessenger()->addMessage('The user was edited');
 

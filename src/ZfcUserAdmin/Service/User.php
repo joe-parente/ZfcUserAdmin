@@ -85,7 +85,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
      * @param UserInterface $user
      * @return UserInterface
      */
-    public function edit(Form $form, array $data, UserInterface $user) {
+    public function edit(Form $form, array $data, UserInterface $user, $currentPassword = null) {
 //        // first, process all form fields
 //        foreach ($data as $key => $value) {
 //            if ($key == 'password') continue;
@@ -109,6 +109,8 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
                 $bcrypt = new Bcrypt();
                 $bcrypt->setCost($this->getZfcUserOptions()->getPasswordCost());
                 $user->setPassword($bcrypt->create($argv['password']));
+            } else {
+                $user->setPassword($currentPassword);
             }
         }
 
