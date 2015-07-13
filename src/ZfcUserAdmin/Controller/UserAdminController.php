@@ -1239,5 +1239,75 @@ class UserAdminController extends AbstractActionController {
         $response->setContent($s);
         return $response;
     }
+    private function _getFilteredUsers($filter) {
 
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+
+        $querybuilder = $EntityManager->createQueryBuilder();
+        $querybuilder->select('i');
+        $querybuilder->from('Client\Entity\Invoice', 'i');
+
+        if ($filter['inv']) {
+            $querybuilder->andWhere('i.invoice = :inv');
+            $querybuilder->setParameter('inv', $filter['inv']);
+        } else {
+
+            if ($filter['parent'] && !$filter['department']) {
+
+                $parent = $EntityManager
+                        ->getRepository('Application\Entity\Client')
+                        ->findOneBy(['id' => $filter['parent']]);
+                $departments = $parent->getChildren();
+                $invoiceList = [];
+
+                foreach ($departments as $department) {
+                    $invoices = $department->getInvoices();
+                    foreach ($invoices as $invoice) {
+                        $invoiceList[] = $invoice->getId();
+                    }
+                }
+                $querybuilder->add('where', $querybuilder->expr()->in('i.id', $invoiceList));
+            } else {
+
+                if ($filter['department']) {
+                    $querybuilder->andWhere('i.client = :client');
+                    $querybuilder->setParameter('client', $filter['department']);
+                } else {
+
+                    if ($filter['region']) {
+                        $querybuilder->andWhere('i.region_id = :region');
+                        $querybuilder->setParameter('region', $filter['region']);
+                    }
+                }
+            }
+            if ($filter['status']) {
+                $querybuilder->andWhere('i.status = :status');
+                $querybuilder->setParameter('status', $filter['status']);
+            }
+
+            if ($filter['to']) {
+                $querybuilder->andWhere('i.date < :todate');
+                $querybuilder->setParameter('todate', $filter['to']);
+            }
+            if ($filter['from']) {
+                $querybuilder->andWhere('i.date > :fromdate');
+                $querybuilder->setParameter('fromdate', $filter['from']);
+            }
+        }
+
+        $querybuilder->orderBy('i.date', 'desc');
+        $querybuilder->setMaxResults(100);
+        $query = $querybuilder->getQuery();
+        $sql = $query->getDQL();
+        // die(var_dump($sql));
+        // $type = $query->getType();
+        $invoices = $query->getResult();
+        $return = [];
+        foreach ($invoices as $invoice) {
+            $return[] = $invoice;
+        }
+        return $return;
+    }
 }
