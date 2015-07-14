@@ -200,6 +200,34 @@ return array(
                                 ),
                                 'mayterminate' => true,
                             ),
+                            'getuseradminparents' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getuseradminparents',
+                                    'constraints' => array(
+                                        'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                    ),
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getuseradminparents',
+                                    ),
+                                ),
+                            ),
+                            'getadminfilteredusers' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => 'getadminfilteredusers',
+                                    'constraints' => array(
+                                        'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                    ),
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getadminfilteredusers',
+                                    ),
+                                ),
+                            ),
                             'getuserlist' => array(
                                 'type' => 'Literal',
                                 'options' => array(

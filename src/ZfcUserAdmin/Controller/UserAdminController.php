@@ -25,8 +25,20 @@ class UserAdminController extends AbstractActionController {
 
     public function listAction() {
 
+        $router = $this->getServiceLocator()->get('Router');
+        var_dump($router);
+        
         $this->_session = new Container($this->_namespace);
-
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $regions = $EntityManager
+                ->getRepository('Application\Entity\Regionxref')
+                ->findAll();
+        $options = '<option value="0">None</option>';
+        foreach ($regions as $region) {
+            $options .= '<option value="' . $region->getR5wRegionpky() . '">' . $region->getR5wRegionname() . '</option>';
+        }
 
         $userMapper = $this->getUserMapper();
         $users = $userMapper->findAll();
@@ -40,10 +52,13 @@ class UserAdminController extends AbstractActionController {
         $paginator->setCurrentPageNumber($this->getEvent()->getRouteMatch()->getParam('p'));
         return array(
             'users' => $paginator,
+            'options' => $options,
             'userlistElements' => $this->getOptions()->getUserListElements()
         );
     }
-
+    public function getAdminFilteredUsersAction() {
+        return 0;
+    }
     public function createAction() {
 
         $this->_session = new Container($this->_namespace);
@@ -138,7 +153,29 @@ class UserAdminController extends AbstractActionController {
 
         return $this->redirect()->toRoute('zfcadmin/zfcuseradmin/list');
     }
+    public function getUserAdminParentsAction() {
 
+        $parms = $_POST;
+        $region = $parms['region'];
+
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+
+        $subs = $EntityManager
+                ->getRepository('Application\Entity\Client')
+                ->findBy(['region_id' => $region, 'parent' => null], ['name' => 'asc']);
+        $s = '';
+        foreach ($subs as $sub) {
+            $s .= '<option value=' . $sub->getId() . '>' . $sub->getName() . '</option>';
+        }
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'text/html');
+        $response->setStatusCode(200);
+        $response->setContent($s);
+        return $response;
+    }
+    
     public function setOptions(ModuleOptions $options) {
         $this->options = $options;
         return $this;
@@ -1247,7 +1284,7 @@ class UserAdminController extends AbstractActionController {
 
         $querybuilder = $EntityManager->createQueryBuilder();
         $querybuilder->select('i');
-        $querybuilder->from('Client\Entity\Invoice', 'i');
+        $querybuilder->from('Application\Entity\User', 'i');
 
         if ($filter['inv']) {
             $querybuilder->andWhere('i.invoice = :inv');

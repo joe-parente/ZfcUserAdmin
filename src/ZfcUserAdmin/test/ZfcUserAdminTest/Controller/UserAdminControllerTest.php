@@ -1,16 +1,26 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+namespace ZfcUserAdminTest;
+
+use Zend\Test\PHPUnit\Controller\AbstractHttpControllerTestCase;
 
 /**
  * Description of UserAdminControllerTest
  *
  * @author jparente
  */
-class UserAdminControllerTest {
-    //put your code here
+class UserAdminControllerTest extends AbstractHttpControllerTestCase {
+
+    public function setUp() {
+        $this->setApplicationConfig(
+                include '../../../../../config/application.config.php'
+        );
+        parent::setUp();
+    }
+
+    public function testIndexAction() {
+       $this->dispatch('/admin/user/list');
+       // $this->assertResponseStatusCode(200);
+    }
+
 }
