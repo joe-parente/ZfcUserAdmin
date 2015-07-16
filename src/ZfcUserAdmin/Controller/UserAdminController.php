@@ -25,9 +25,7 @@ class UserAdminController extends AbstractActionController {
 
     public function listAction() {
 
-        $router = $this->getServiceLocator()->get('Router');
-        var_dump($router);
-        
+
         $this->_session = new Container($this->_namespace);
         $EntityManager = $this
                 ->getServiceLocator()
@@ -56,9 +54,60 @@ class UserAdminController extends AbstractActionController {
             'userlistElements' => $this->getOptions()->getUserListElements()
         );
     }
+
     public function getAdminFilteredUsersAction() {
-        return 0;
+        global $parms;
+        $parms = ($this->params()->fromPost());
+        $page = $parms['page'];
+
+        $allUsers = $this->_getUsers($parms);
+
+        $count = count($allUsers);
+        $rows = 100; // $parms['rows'];
+        $total_pages = ceil($count / $rows);
+
+        $start = (($page - 1) * $rows);
+
+        $filteredIssues = array_filter($allUsers, function($e) {
+            global $parms;
+            $searchFunction = 'getparentclientid';
+            if ($this->matchElement($parms['parentclientid'], $e->$searchFunction(), 'eq')) {
+                return $e;
+            }
+        });
+        $allUsers = array_values($filteredIssues);
+        $start = 0;
+        $rows = 5000;
+
+
+        for ($x = $start; $x < $start + $rows; $x++) {
+            if (!isset($allUsers[$x]))
+                break;
+            $link = '<span><a href="/admin/user/edit/' . $allUsers[$x]->getId() . '"><span class="underliner">Edit</span></a>&nbsp;|&nbsp;<a onclick="return confirm(\'Really delete user?\')" href="/admin/user/remove/' . $allUsers[$x]->getId() . '"><span class="underliner">Delete</span></a></span>';
+            $jasonData['rows'][$allUsers[$x]->getId()] = [
+                'act' => '',
+                'view' => '',
+                'id' => $allUsers[$x]->getId(),
+                'billingcontactkey' => $allUsers[$x]->getBillingContactKey(),
+                'firstname' => $allUsers[$x]->getFirstName(),
+                'lastname' => $allUsers[$x]->getLastName(),
+                'email' => $allUsers[$x]->getEmail(),
+                'parentclientid' => $allUsers[$x]->getParentClientId(),
+                'parentname' => $allUsers[$x]->getParentName(),
+                'lastlogindatetime' => $allUsers[$x]->getLastLoginDate(),
+                'roles' => $allUsers[$x]->getRoles()->getRoleId(),
+                'actions' => $link
+            ];
+        }
+
+
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'application/json');
+        $response->setStatusCode(200);
+        $response->setContent(json_encode($jasonData));
+        return $response;
     }
+
     public function createAction() {
 
         $this->_session = new Container($this->_namespace);
@@ -117,7 +166,7 @@ class UserAdminController extends AbstractActionController {
                 if ($form->getData()->getPassword() == '') {
                     error_log('password from form is empty');
                 }
-                
+
                 $user = $this->getAdminUserService()->edit($form, (array) $request->getPost(), $user, $currentPassword);
                 if ($user) {
                     $this->flashMessenger()->addMessage('The user was edited');
@@ -153,6 +202,7 @@ class UserAdminController extends AbstractActionController {
 
         return $this->redirect()->toRoute('zfcadmin/zfcuseradmin/list');
     }
+
     public function getUserAdminParentsAction() {
 
         $parms = $_POST;
@@ -175,7 +225,7 @@ class UserAdminController extends AbstractActionController {
         $response->setContent($s);
         return $response;
     }
-    
+
     public function setOptions(ModuleOptions $options) {
         $this->options = $options;
         return $this;
@@ -973,8 +1023,8 @@ class UserAdminController extends AbstractActionController {
         $parms = ($this->params()->fromQuery());
         $page = $parms['page'];
         $userid = $this->_session['user'];
-        $parentList = (isset($parms['parent']))?$parms['parent']:'';
-        $departmentList = (isset($parms['departments']))?explode(',', $parms['departments']): '';
+        $parentList = (isset($parms['parent'])) ? $parms['parent'] : '';
+        $departmentList = (isset($parms['departments'])) ? explode(',', $parms['departments']) : '';
 
         $EntityManager = $this
                 ->getServiceLocator()
@@ -987,16 +1037,15 @@ class UserAdminController extends AbstractActionController {
                 ->findBy(['parent' => $parentList]);
         if ($departmentList != '') {
             foreach (array_unique($departmentList) as $department) {
-                
+
                 if (!is_null($department)) {
-                $clientDepartments[] = $EntityManager
-                        ->getRepository('Application\Entity\Client')
-                        ->findOneBy(['id' => $department]); 
+                    $clientDepartments[] = $EntityManager
+                            ->getRepository('Application\Entity\Client')
+                            ->findOneBy(['id' => $department]);
                 }
             }
         } else {
             $clientDepartments = $user->getClients();
-            
         }
 
         foreach ($clientDepartments as $client) {
@@ -1202,19 +1251,17 @@ class UserAdminController extends AbstractActionController {
         return $response;
     }
 
-    public function getUserListAction() {
+    private function _getUsers($parms) {
 
-        $parms = ($this->params()->fromQuery());
-        $page = $parms['page'];
-        $sortIndex = $parms['sidx'];
-        $sortDirection = $parms['sord'];
+//        $sortIndex = $parms['sidx'];
+//        $sortDirection = $parms['sord'];
 
         $EntityManager = $this
                 ->getServiceLocator()
                 ->get('Doctrine\ORM\EntityManager');
 
         if (!isset($sortIndex)) {
-            $sortIndex = 'Id';
+            $sortIndex = 'id';
         }
 
         if (!isset($sortDirection)) {
@@ -1224,6 +1271,15 @@ class UserAdminController extends AbstractActionController {
         $allUsers = $EntityManager
                 ->getRepository('Application\Entity\User')
                 ->findBy([], [$sortIndex => $sortDirection]);
+        return $allUsers;
+    }
+
+    public function getUserListAction() {
+
+        $parms = ($this->params()->fromQuery());
+        $page = $parms['page'];
+
+        $allUsers = $this->_getUsers($parms);
 
         $count = count($allUsers);
         $rows = $parms['rows'];
@@ -1276,7 +1332,8 @@ class UserAdminController extends AbstractActionController {
         $response->setContent($s);
         return $response;
     }
-    private function _getFilteredUsers($filter) {
+
+    public function getFilteredUsers($filter) {
 
         $EntityManager = $this
                 ->getServiceLocator()
@@ -1347,4 +1404,5 @@ class UserAdminController extends AbstractActionController {
         }
         return $return;
     }
+
 }

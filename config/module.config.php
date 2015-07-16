@@ -217,7 +217,7 @@ return array(
                             'getadminfilteredusers' => array(
                                 'type' => 'Literal',
                                 'options' => array(
-                                    'route' => 'getadminfilteredusers',
+                                    'route' => '/getadminfilteredusers',
                                     'constraints' => array(
                                         'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
                                         'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
@@ -226,6 +226,7 @@ return array(
                                         'controller' => 'zfcuseradmin',
                                         'action' => 'getadminfilteredusers',
                                     ),
+                                'mayterminate' => true,
                                 ),
                             ),
                             'getuserlist' => array(
