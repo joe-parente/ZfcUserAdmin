@@ -68,14 +68,14 @@ class UserAdminController extends AbstractActionController {
 
         $start = (($page - 1) * $rows);
 
-        $filteredIssues = array_filter($allUsers, function($e) {
-            global $parms;
-            $searchFunction = 'getparentclientid';
-            if ($this->matchElement($parms['parentclientid'], $e->$searchFunction(), 'eq')) {
-                return $e;
-            }
-        });
-        $allUsers = array_values($filteredIssues);
+//        $filteredIssues = array_filter($allUsers, function($e) {
+//            global $parms;
+//            $searchFunction = 'getparentclientid';
+//            if ($this->matchElement($parms['parentclientid'], $e->$searchFunction(), 'eq')) {
+//                return $e;
+//            }
+//        });
+//        $allUsers = array_values($filteredIssues);
         $start = 0;
         $rows = 5000;
 
