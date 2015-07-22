@@ -74,7 +74,11 @@ class UserAdminController extends AbstractActionController {
         for ($x = $start; $x < $start + $rows; $x++) {
             if (!isset($allUsers[$x]))
                 break;
-            $link = '<span><a href="/admin/user/edit/' . $allUsers[$x]->getId() . '"><span class="underliner">Edit</span></a>&nbsp;|&nbsp;<a onclick="return confirm(\'Really delete user?\')" href="/admin/user/remove/' . $allUsers[$x]->getId() . '"><span class="underliner">Delete</span></a></span>';
+            $link = '<span><a href="/admin/user/edit/' . 
+                    $allUsers[$x]->getId() . 
+                    '"><span class="underliner">Edit</span></a>&nbsp;|&nbsp;<a onclick="return confirm(\'Really delete user?\')" href="/admin/user/remove/' .
+                    $allUsers[$x]->getId() .
+                    '"><span class="underliner">Delete</span></a></span>&nbsp;|&nbsp;<a onclick="return confirm(\'Really impersonate this user?\')" href="/admin/user/impersonate/'  .  $allUsers[$x]->getId() . '"<span class="underliner">Impersonate</span></a></span>';
             $jsonData['rows'][$x] = [
                 'act' => '',
                 'view' => '',
