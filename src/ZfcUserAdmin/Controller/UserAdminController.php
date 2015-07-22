@@ -56,35 +56,26 @@ class UserAdminController extends AbstractActionController {
     }
 
     public function getAdminFilteredUsersAction() {
-        global $parms;
+
         $parms = ($this->params()->fromPost());
         $page = $parms['page'];
 
-        $allUsers = $this->_getUsers($parms);
+        $allUsers = $this->getFilteredUsers($parms);
 
         $count = count($allUsers);
         $rows = 100; // $parms['rows'];
         $total_pages = ceil($count / $rows);
 
         $start = (($page - 1) * $rows);
-
-//        $filteredIssues = array_filter($allUsers, function($e) {
-//            global $parms;
-//            $searchFunction = 'getparentclientid';
-//            if ($this->matchElement($parms['parentclientid'], $e->$searchFunction(), 'eq')) {
-//                return $e;
-//            }
-//        });
-//        $allUsers = array_values($filteredIssues);
-        $start = 0;
         $rows = 5000;
 
+        $jsonData = [];
 
         for ($x = $start; $x < $start + $rows; $x++) {
             if (!isset($allUsers[$x]))
                 break;
             $link = '<span><a href="/admin/user/edit/' . $allUsers[$x]->getId() . '"><span class="underliner">Edit</span></a>&nbsp;|&nbsp;<a onclick="return confirm(\'Really delete user?\')" href="/admin/user/remove/' . $allUsers[$x]->getId() . '"><span class="underliner">Delete</span></a></span>';
-            $jasonData['rows'][$allUsers[$x]->getId()] = [
+            $jsonData['rows'][$x] = [
                 'act' => '',
                 'view' => '',
                 'id' => $allUsers[$x]->getId(),
@@ -99,12 +90,14 @@ class UserAdminController extends AbstractActionController {
                 'actions' => $link
             ];
         }
-
+        $jsonData['page'] = $page;
+        $jsonData['records'] = count($allUsers);
+        $jsonData['total'] = count($allUsers);
 
         $response = $this->getResponse();
         $response->getHeaders()->addHeaderLine('Content-Type', 'application/json');
         $response->setStatusCode(200);
-        $response->setContent(json_encode($jasonData));
+        $response->setContent(json_encode($jsonData));
         return $response;
     }
 
@@ -1340,67 +1333,47 @@ class UserAdminController extends AbstractActionController {
                 ->get('Doctrine\ORM\EntityManager');
 
         $querybuilder = $EntityManager->createQueryBuilder();
-        $querybuilder->select('i');
-        $querybuilder->from('Application\Entity\User', 'i');
+        $querybuilder->select('u');
+        $querybuilder->from('Application\Entity\User', 'u');
 
-        if ($filter['inv']) {
-            $querybuilder->andWhere('i.invoice = :inv');
-            $querybuilder->setParameter('inv', $filter['inv']);
+        if ($filter['email']) {
+            $querybuilder->andWhere('u.email = :email');
+            $querybuilder->setParameter('email', $filter['email']);
+        }
+        if ($filter['fname']) {
+            $querybuilder->andWhere('u.firstname = :fname');
+            $querybuilder->setParameter('fname', $filter['fname']);
+        }
+        if ($filter['lname']) {
+            $querybuilder->andWhere('u.lastname = :lname');
+            $querybuilder->setParameter('lname', $filter['lname']);
+        }
+        if ($filter['parentclientid']) {
+
+            $querybuilder->andWhere('u.parentclientid = :pci');
+            $querybuilder->setParameter('pci', $filter['parentclientid']);
         } else {
 
-            if ($filter['parent'] && !$filter['department']) {
+            if ($filter['region']) {
 
                 $parent = $EntityManager
-                        ->getRepository('Application\Entity\Client')
-                        ->findOneBy(['id' => $filter['parent']]);
-                $departments = $parent->getChildren();
-                $invoiceList = [];
+                        ->getRepository('Application\Entity\User')
+                        ->findOneBy(['id' => $filter['parentclientid']]);
 
-                foreach ($departments as $department) {
-                    $invoices = $department->getInvoices();
-                    foreach ($invoices as $invoice) {
-                        $invoiceList[] = $invoice->getId();
-                    }
-                }
-                $querybuilder->add('where', $querybuilder->expr()->in('i.id', $invoiceList));
-            } else {
-
-                if ($filter['department']) {
-                    $querybuilder->andWhere('i.client = :client');
-                    $querybuilder->setParameter('client', $filter['department']);
-                } else {
-
-                    if ($filter['region']) {
-                        $querybuilder->andWhere('i.region_id = :region');
-                        $querybuilder->setParameter('region', $filter['region']);
-                    }
-                }
-            }
-            if ($filter['status']) {
-                $querybuilder->andWhere('i.status = :status');
-                $querybuilder->setParameter('status', $filter['status']);
-            }
-
-            if ($filter['to']) {
-                $querybuilder->andWhere('i.date < :todate');
-                $querybuilder->setParameter('todate', $filter['to']);
-            }
-            if ($filter['from']) {
-                $querybuilder->andWhere('i.date > :fromdate');
-                $querybuilder->setParameter('fromdate', $filter['from']);
+                $querybuilder->andWhere('i.region_id = :region');
+                $querybuilder->setParameter('region', $filter['region']);
             }
         }
 
-        $querybuilder->orderBy('i.date', 'desc');
+
         $querybuilder->setMaxResults(100);
         $query = $querybuilder->getQuery();
         $sql = $query->getDQL();
-        // die(var_dump($sql));
-        // $type = $query->getType();
-        $invoices = $query->getResult();
+
+        $users = $query->getResult();
         $return = [];
-        foreach ($invoices as $invoice) {
-            $return[] = $invoice;
+        foreach ($users as $user) {
+            $return[] = $user;
         }
         return $return;
     }
