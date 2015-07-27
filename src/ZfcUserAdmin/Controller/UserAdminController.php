@@ -1336,26 +1336,27 @@ class UserAdminController extends AbstractActionController {
                 ->getServiceLocator()
                 ->get('Doctrine\ORM\EntityManager');
 
-        $querybuilder = $EntityManager->createQueryBuilder();
-        $querybuilder->select('u');
-        $querybuilder->from('Application\Entity\User', 'u');
+        $qb = $EntityManager->createQueryBuilder();
+        $qb->select('u');
+        $qb->from('Application\Entity\User', 'u');
 
         if ($filter['email']) {
-            $querybuilder->andWhere('u.email = :email');
-            $querybuilder->setParameter('email', $filter['email']);
+            $qb->andWhere('u.email LIKE :email');
+            $qb->setParameter('email', '%'.$filter['email'].'%');
+//            $qb->setParameter('email');
         }
         if ($filter['fname']) {
-            $querybuilder->andWhere('u.firstname = :fname');
-            $querybuilder->setParameter('fname', $filter['fname']);
+            $qb->andWhere('u.firstname LIKE :fname');
+            $qb->setParameter('fname', '%'.$filter['fname'].'%');
         }
         if ($filter['lname']) {
-            $querybuilder->andWhere('u.lastname = :lname');
-            $querybuilder->setParameter('lname', $filter['lname']);
+            $qb->andWhere('u.lastname LIKE :lname');
+            $qb->setParameter('lname', '%'.$filter['lname'].'%');
         }
         if ($filter['parentclientid']) {
 
-            $querybuilder->andWhere('u.parentclientid = :pci');
-            $querybuilder->setParameter('pci', $filter['parentclientid']);
+            $qb->andWhere('u.parentclientid = :pci');
+            $qb->setParameter('pci', $filter['parentclientid']);
         } else {
 
             if ($filter['region']) {
@@ -1364,14 +1365,14 @@ class UserAdminController extends AbstractActionController {
                         ->getRepository('Application\Entity\User')
                         ->findOneBy(['id' => $filter['parentclientid']]);
 
-                $querybuilder->andWhere('i.region_id = :region');
-                $querybuilder->setParameter('region', $filter['region']);
+                $qb->andWhere('i.region_id = :region');
+                $qb->setParameter('region', $filter['region']);
             }
         }
 
 
-        $querybuilder->setMaxResults(100);
-        $query = $querybuilder->getQuery();
+        $qb->setMaxResults(100);
+        $query = $qb->getQuery();
         $sql = $query->getDQL();
 
         $users = $query->getResult();
