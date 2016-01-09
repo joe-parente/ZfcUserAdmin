@@ -74,11 +74,11 @@ class UserAdminController extends AbstractActionController {
         for ($x = $start; $x < $start + $rows; $x++) {
             if (!isset($allUsers[$x]))
                 break;
-            $link = '<span><a href="/admin/user/edit/' . 
-                    $allUsers[$x]->getId() . 
+            $link = '<span><a href="/admin/user/edit/' .
+                    $allUsers[$x]->getId() .
                     '"><span class="underliner">Edit</span></a>&nbsp;|&nbsp;<a onclick="return confirm(\'Really delete user?\')" href="/admin/user/remove/' .
                     $allUsers[$x]->getId() .
-                    '"><span class="underliner">Delete</span></a></span>&nbsp;|&nbsp;<a onclick="return confirm(\'Really impersonate this user?\')" href="/admin/user/impersonate/'  .  
+                    '"><span class="underliner">Delete</span></a></span>&nbsp;|&nbsp;<a onclick="return confirm(\'Really impersonate this user?\')" href="/admin/user/impersonate/' .
                     $allUsers[$x]->getId() . '"<span class="underliner">Impersonate</span></a></span>';
             $jsonData['rows'][$x] = [
                 'act' => '',
@@ -1341,42 +1341,37 @@ class UserAdminController extends AbstractActionController {
         $qb->select('u');
         $qb->from('Application\Entity\User', 'u');
 
-        if ($filter['email']) {
-            $qb->andWhere('u.email LIKE :email');
-            $qb->setParameter('email', '%'.$filter['email'].'%');
-//            $qb->setParameter('email');
-        }
-        if ($filter['fname']) {
-            $qb->andWhere('u.firstname LIKE :fname');
-            $qb->setParameter('fname', '%'.$filter['fname'].'%');
-        }
-        if ($filter['lname']) {
-            $qb->andWhere('u.lastname LIKE :lname');
-            $qb->setParameter('lname', '%'.$filter['lname'].'%');
-        }
-        if ($filter['parentclientid']) {
 
-            $qb->andWhere('u.parentclientid = :pci');
-            $qb->setParameter('pci', $filter['parentclientid']);
-        } else {
+        if ($filter['parentclientid'] && $filter['region']) {
 
-            if ($filter['region']) {
-
-                $parent = $EntityManager
-                        ->getRepository('Application\Entity\User')
-                        ->findOneBy(['id' => $filter['parentclientid']]);
-
-                $qb->andWhere('i.region_id = :region');
-                $qb->setParameter('region', $filter['region']);
+            $users = [];
+            $children = $EntityManager->find('\Application\Entity\Client', $filter['parentclientid'])->getChildren();
+            foreach ($children as $child) {
+                foreach ($child->getUsers() as $user) {
+                    if (!in_array($user, $users)) {
+                        $users[] = $user;
+                    }
+                }
             }
+        } else {
+            if ($filter['email']) {
+                $qb->andWhere('u.email LIKE :email');
+                $qb->setParameter('email', '%' . $filter['email'] . '%');
+            }
+            if ($filter['fname']) {
+                $qb->andWhere('u.firstname LIKE :fname');
+                $qb->setParameter('fname', '%' . $filter['fname'] . '%');
+            }
+            if ($filter['lname']) {
+                $qb->andWhere('u.lastname LIKE :lname');
+                $qb->setParameter('lname', '%' . $filter['lname'] . '%');
+            }
+            $qb->setMaxResults(100);
+            $query = $qb->getQuery();
+            $sql = $query->getDQL();
+
+            $users = $query->getResult();
         }
-
-
-        $qb->setMaxResults(100);
-        $query = $qb->getQuery();
-        $sql = $query->getDQL();
-
-        $users = $query->getResult();
         $return = [];
         foreach ($users as $user) {
             $return[] = $user;

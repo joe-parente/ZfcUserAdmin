@@ -176,6 +176,14 @@ class CreateUser extends Register {
                 'id' => 'department_list',
             ],
         ]);
+        $this->add([
+            'type' => 'Zend\Form\Element\Hidden',
+            'name' => 'acceptedagreement',
+            'attributes' => [
+                'value' => '0',
+                'id' => 'acceptedagreement',
+            ],
+        ]);
 //        $this->add(array(
 //            'name' => 'parentclientid',
 //            'type' => 'Application\Form\Element\DtgAutocompleteElement',
