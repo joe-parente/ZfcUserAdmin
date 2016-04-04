@@ -91,6 +91,7 @@ class UserAdminController extends AbstractActionController {
                 'parentclientid' => $allUsers[$x]->getParentClientId(),
                 'parentname' => $allUsers[$x]->getParentName(),
                 'lastlogindatetime' => $allUsers[$x]->getLastLoginDate(),
+                'acceptedagreement' => $allUsers[$x]->getAcceptedAgreement(),
                 'roles' => $allUsers[$x]->getRoles()->getRoleId(),
                 'actions' => $link
             ];
