@@ -183,6 +183,7 @@ class UserAdminController extends AbstractActionController {
             'createddate' => $user->getCreatedDate(),
             'modifieddate' => $user->getModifiedDate(),
             'lastlogindate' => $user->getLastLoginDate(),
+            'acceptedAgreementDate' => $user->getAcceptedAgreement(),
         );
     }
 
