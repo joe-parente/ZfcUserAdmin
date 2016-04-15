@@ -4,11 +4,13 @@ namespace ZfcUserAdmin\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\Paginator;
-use Zend\Stdlib\Hydrator\ClassMethods;
 use ZfcUser\Mapper\UserInterface;
 use ZfcUser\Options\ModuleOptions as ZfcUserModuleOptions;
 use ZfcUserAdmin\Options\ModuleOptions;
 use Zend\Session\Container;
+use Zend\Mail\Message;
+use Zend\Mail\Transport\Sendmail as SendmailTransport;
+use Zend\Mime;
 
 class UserAdminController extends AbstractActionController {
 
@@ -45,7 +47,16 @@ class UserAdminController extends AbstractActionController {
         } else {
             $paginator = $users;
         }
-
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $regions = $EntityManager
+                ->getRepository('Application\Entity\Regionxref')
+                ->findAll();
+        $options = '<option value="0">None</option>';
+        foreach ($regions as $region) {
+            $options .= '<option value="' . $region->getR5wRegionpky() . '">' . $region->getR5wRegionname() . '</option>';
+        }
         $paginator->setItemCountPerPage(100);
         $paginator->setCurrentPageNumber($this->getEvent()->getRouteMatch()->getParam('p'));
         return array(
@@ -120,7 +131,6 @@ class UserAdminController extends AbstractActionController {
             $zfcUserOptions = $this->getZfcUserOptions();
             $class = $zfcUserOptions->getUserEntityClass();
             $user = new $class();
-//            $form->setHydrator(new ClassMethods());
             $hydrator = $this->getServiceLocator()->get('zfcuser_user_hydrator');
             $form->setHydrator($hydrator);
             $form->bind($user);
@@ -672,16 +682,7 @@ class UserAdminController extends AbstractActionController {
             $multiRegion[] = $userRegion->getR5wRegionname();
         }
 
-//        if (!is_array($multiRegion) || !in_array($region, $multiRegion)) {
-//            if (!is_null($region)) {
-//                $multiRegion[] = $region;
-//            }
-//        }
-
         $allClients = $this->getAllClients(array_unique(array_merge($regions, $multiRegion)));
-
-
-
         foreach ($userclients as $client) {
 
             if (array_key_exists($client->getParent()->getId(), $allClients)) {
@@ -1381,4 +1382,118 @@ class UserAdminController extends AbstractActionController {
         return $return;
     }
 
+    public function getInviteDepartmentsAction() {
+
+        $parms = $_GET;
+        $parent = $parms['parent'];
+
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+
+        $subs = $EntityManager
+                ->getRepository('Application\Entity\Client')
+                ->findBy(['parent' => $parent], ['name' => 'asc']);
+        $s = '';
+        foreach ($subs as $sub) {
+            $s .= '<li value="' . $sub->getAmateid() . '"><input type="button" class="btn-warning" value="Remove" onclick="$(this).parent().remove()"> ' . $sub->getParent()->getName() . ' - ' . $sub->getName() . '</li>';
+        }
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'text/html');
+        $response->setStatusCode(200);
+        $response->setContent($s);
+        return $response;
+    }
+
+    public function inviteUserAction() {
+        $parms = ($this->params()->fromPost());
+
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'text/html');
+        $newEmail = $parms['email'];
+        $departments = isset($parms['departments']) ? $parms['departments'] : [];
+
+        if ($this->emailExists($newEmail)) {
+            $s = 'Email address already exists';
+            $response->setStatusCode(409);
+            $response->setContent($s);
+            return $response;
+        }
+        if (!count($departments)) {
+            $s = 'No departments selected';
+            $response->setStatusCode(400);
+            $response->setContent($s);
+            return $response;
+        }
+
+        $result = $this->addUser($newEmail, $departments);
+
+        if (!$result) {
+            $s = 'Error adding user - call support';
+            $response->setStatusCode(503);
+            $response->setContent($s);
+            return $response;
+        }
+        $this->sendInviteEmail($newEmail, $result);
+        $s = 'ok';
+
+        $response->setStatusCode(200);
+        $response->setContent($s);
+        return $response;
+    }
+
+    public function emailExists($email) {
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $exists = $EntityManager
+                ->getRepository('Application\Entity\User')
+                ->findBy(['email' => $email]);
+        return $exists;
+    }
+
+    public function addUser($email, $departments) {
+        $EntityManager = $this
+                ->getServiceLocator()
+                ->get('Doctrine\ORM\EntityManager');
+        $user = new \Application\Entity\User();
+        $user->setEmail($email);
+        $user->setCreateDateTime(new \DateTime());
+        foreach ($departments as $dept) {
+            $client = $EntityManager
+                    ->getRepository('Application\Entity\Client')
+                    ->findOneBy(['amateid' => $dept]);
+            $user->addClient($client);
+        }
+        $EntityManager->persist($user);
+        $EntityManager->flush();
+        if ($user->getId()) {
+            return $user->getId();
+        }
+        return false;
+    }
+
+    public function sendInviteEmail($email, $id) {
+        $message = new Message();
+
+        $message->addFrom('invoices@ezserviceportal.com')
+                ->addTo($email)
+                ->setSubject('Please complete your registration');
+
+        $body = '<p>Please click on the link below to complet your registration on the invoice portal.</p>';
+        $body .='<a href="https://einvoice.ezserviceportal.com/user/invited/' . $id . '">Click here</a>';
+
+        $text = new Mime\Part($body);
+        $text->type = Mime\Mime::TYPE_HTML;
+
+        $mimeMessage = new Mime\Message();
+        $mimeMessage->setParts(array($text));
+
+        $trans = new SendmailTransport();
+        $message->setBody($mimeMessage);
+        $trans->send($message);
+    }
+    public function invitedAction() {
+        return 'alright!';
+    }
 }

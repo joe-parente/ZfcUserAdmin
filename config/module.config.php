@@ -79,6 +79,39 @@ return array(
                                 ),
                                 'mayterminate' => true,
                             ),
+                            'getinvitedepartments' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/getinvitedepartments',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'getinvitedepartments',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
+                            'inviteuser' => array(
+                                'type' => 'Literal',
+                                'options' => array(
+                                    'route' => '/inviteuser',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'inviteuser',
+                                    ),
+                                ),
+                                'mayterminate' => true,
+                            ),
+                            'invited' => array(
+                                'type' => 'Segment',
+                                'options' => array(
+                                    'route' => '/invited/:userId',
+                                    'defaults' => array(
+                                        'controller' => 'zfcuseradmin',
+                                        'action' => 'invited',
+                                        'userId' => 0
+                                    ),
+                                ),
+                            ),
                             'updatedepartments' => array(
                                 'type' => 'Literal',
                                 'options' => array(
@@ -226,7 +259,7 @@ return array(
                                         'controller' => 'zfcuseradmin',
                                         'action' => 'getadminfilteredusers',
                                     ),
-                                'mayterminate' => true,
+                                    'mayterminate' => true,
                                 ),
                             ),
                             'getuserlist' => array(
