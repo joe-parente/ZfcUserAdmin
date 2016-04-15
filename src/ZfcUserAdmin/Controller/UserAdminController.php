@@ -1493,7 +1493,5 @@ class UserAdminController extends AbstractActionController {
         $message->setBody($mimeMessage);
         $trans->send($message);
     }
-    public function invitedAction() {
-        return 'alright!';
-    }
+
 }

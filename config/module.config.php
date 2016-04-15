@@ -101,17 +101,6 @@ return array(
                                 ),
                                 'mayterminate' => true,
                             ),
-                            'invited' => array(
-                                'type' => 'Segment',
-                                'options' => array(
-                                    'route' => '/invited/:userId',
-                                    'defaults' => array(
-                                        'controller' => 'zfcuseradmin',
-                                        'action' => 'invited',
-                                        'userId' => 0
-                                    ),
-                                ),
-                            ),
                             'updatedepartments' => array(
                                 'type' => 'Literal',
                                 'options' => array(
