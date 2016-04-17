@@ -1465,6 +1465,10 @@ class UserAdminController extends AbstractActionController {
                     ->findOneBy(['amateid' => $dept]);
             $user->addClient($client);
         }
+        $role = $EntityManager
+                ->getRepository('Application\Entity\Role')
+                ->findOneBy(['roleId' => 'client']);
+        $user->addRole($role);
         $EntityManager->persist($user);
         $EntityManager->flush();
         if ($user->getId()) {
