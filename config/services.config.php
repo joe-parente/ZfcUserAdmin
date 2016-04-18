@@ -1,4 +1,5 @@
 <?php
+
 /**
  * User: Vladimir Garvardt
  * Date: 3/18/13
@@ -22,22 +23,20 @@ return array(
             $config = $sm->get('Config');
             return new Options\ModuleOptions(isset($config['zfcuseradmin']) ? $config['zfcuseradmin'] : array());
         },
-        'zfcuseradmin_edituser_form' => function (ServiceLocatorInterface $sm) {
+                'zfcuseradmin_edituser_form' => function (ServiceLocatorInterface $sm) {
             /** @var $zfcUserOptions \ZfcUser\Options\UserServiceOptionsInterface */
             $zfcUserOptions = $sm->get('zfcuser_module_options');
             /** @var $zfcUserAdminOptions \ZfcUserAdmin\Options\ModuleOptions */
             $zfcUserAdminOptions = $sm->get('zfcuseradmin_module_options');
             $form = new Form\EditUser(null, $zfcUserAdminOptions, $zfcUserOptions, $sm);
             $filter = new RegisterFilter(
-                new NoRecordExistsEdit(array(
-                    'mapper' => $sm->get('zfcuser_user_mapper'),
-                    'key' => 'email'
-                )),
-                new NoRecordExistsEdit(array(
-                    'mapper' => $sm->get('zfcuser_user_mapper'),
-                    'key' => 'username'
-                )),
-                $zfcUserOptions
+                    new NoRecordExistsEdit(array(
+                'mapper' => $sm->get('zfcuser_user_mapper'),
+                'key' => 'email'
+                    )), new NoRecordExistsEdit(array(
+                'mapper' => $sm->get('zfcuser_user_mapper'),
+                'key' => 'username'
+                    )), $zfcUserOptions
             );
             if (!$zfcUserAdminOptions->getAllowPasswordChange()) {
                 $filter->remove('password')->remove('passwordVerify');
@@ -48,22 +47,20 @@ return array(
             $form->setInputFilter($filter);
             return $form;
         },
-        'zfcuseradmin_createuser_form' => function (ServiceLocatorInterface $sm) {
+                'zfcuseradmin_createuser_form' => function (ServiceLocatorInterface $sm) {
             /** @var $zfcUserOptions \ZfcUser\Options\UserServiceOptionsInterface */
             $zfcUserOptions = $sm->get('zfcuser_module_options');
             /** @var $zfcUserAdminOptions \ZfcUserAdmin\Options\ModuleOptions */
             $zfcUserAdminOptions = $sm->get('zfcuseradmin_module_options');
             $form = new Form\CreateUser(null, $zfcUserAdminOptions, $zfcUserOptions, $sm);
             $filter = new RegisterFilter(
-                new NoRecordExists(array(
-                    'mapper' => $sm->get('zfcuser_user_mapper'),
-                    'key' => 'email'
-                )),
-                new NoRecordExists(array(
-                    'mapper' => $sm->get('zfcuser_user_mapper'),
-                    'key' => 'username'
-                )),
-                $zfcUserOptions
+                    new NoRecordExists(array(
+                'mapper' => $sm->get('zfcuser_user_mapper'),
+                'key' => 'email'
+                    )), new NoRecordExists(array(
+                'mapper' => $sm->get('zfcuser_user_mapper'),
+                'key' => 'username'
+                    )), $zfcUserOptions
             );
             if ($zfcUserAdminOptions->getCreateUserAutoPassword()) {
                 $filter->remove('password')->remove('passwordVerify');
@@ -71,14 +68,37 @@ return array(
             $form->setInputFilter($filter);
             return $form;
         },
-        'zfcuser_user_mapper' => function (ServiceLocatorInterface $sm) {
+                'zfcuseradmin_complete_registration_form' => function (ServiceLocatorInterface $sm) {
+            /** @var $zfcUserOptions \ZfcUser\Options\UserServiceOptionsInterface */
+            $zfcUserOptions = $sm->get('zfcuser_module_options');
+            /** @var $zfcUserAdminOptions \ZfcUserAdmin\Options\ModuleOptions */
+            $zfcUserAdminOptions = $sm->get('zfcuseradmin_module_options');
+            $form = new Application\Form\CompleteRegistration(null, $zfcUserAdminOptions, $zfcUserOptions, $sm);
+            $filter = new RegisterFilter(
+                    new NoRecordExistsEdit(array(
+                'mapper' => $sm->get('zfcuser_user_mapper'),
+                'key' => 'email'
+                    )), new NoRecordExistsEdit(array(
+                'mapper' => $sm->get('zfcuser_user_mapper'),
+                'key' => 'username'
+                    )), $zfcUserOptions
+            );
+            if (!$zfcUserAdminOptions->getAllowPasswordChange()) {
+                $filter->remove('password')->remove('passwordVerify');
+            } else {
+                $filter->get('password')->setRequired(false);
+                $filter->remove('passwordVerify');
+            }
+            $form->setInputFilter($filter);
+            return $form;
+        },
+                'zfcuser_user_mapper' => function (ServiceLocatorInterface $sm) {
             /** @var $config \ZfcUserAdmin\Options\ModuleOptions */
             $config = $sm->get('zfcuseradmin_module_options');
             $mapperClass = $config->getUserMapper();
             if (stripos($mapperClass, 'doctrine') !== false) {
                 $mapper = new $mapperClass(
-                    $sm->get('zfcuser_doctrine_em'),
-                    $sm->get('zfcuser_module_options')
+                        $sm->get('zfcuser_doctrine_em'), $sm->get('zfcuser_module_options')
                 );
             } else {
                 /** @var $zfcUserOptions \ZfcUser\Options\UserServiceOptionsInterface */
@@ -95,5 +115,6 @@ return array(
 
             return $mapper;
         },
-    ),
-);
+            ),
+        );
+        
