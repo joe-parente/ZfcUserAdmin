@@ -69,12 +69,13 @@ return array(
             return $form;
         },
                 'zfcuseradmin_complete_registration_form' => function (ServiceLocatorInterface $sm) {
+
             /** @var $zfcUserOptions \ZfcUser\Options\UserServiceOptionsInterface */
             $zfcUserOptions = $sm->get('zfcuser_module_options');
             /** @var $zfcUserAdminOptions \ZfcUserAdmin\Options\ModuleOptions */
             $zfcUserAdminOptions = $sm->get('zfcuseradmin_module_options');
             $form = new Application\Form\CompleteRegistration(null, $zfcUserAdminOptions, $zfcUserOptions, $sm);
-            $filter = new RegisterFilter(
+            $filter = new \Application\Form\CompleteRegistrationFilter(
                     new NoRecordExistsEdit(array(
                 'mapper' => $sm->get('zfcuser_user_mapper'),
                 'key' => 'email'

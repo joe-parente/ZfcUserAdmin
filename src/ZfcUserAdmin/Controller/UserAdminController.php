@@ -1405,49 +1405,41 @@ class UserAdminController extends AbstractActionController {
         return $response;
     }
 
-    public function inviteUserAction() {
-        $userId = $this->getEvent()->getRouteMatch()->getParam('userId');
-        $user = $this->getUserMapper()->findById($userId);
-        $this->_session = new Container($this->_namespace);
-        $this->_session['user'] = $user->getId();
+     public function inviteUserAction() {
+        $parms = ($this->params()->fromPost());
 
-        /** @var $form \Application\Form\CompleteRegistration */
-        $form = $this->getServiceLocator()->get('zfcuseradmin_complete_registration_form');
-        $hydrator = $this->getServiceLocator()->get('zfcuser_user_hydrator');
-        $form->setHydrator($hydrator);
-        $form->bind($user);
+        $response = $this->getResponse();
+        $response->getHeaders()->addHeaderLine('Content-Type', 'text/html');
+        $newEmail = $parms['email'];
+        $departments = isset($parms['departments']) ? $parms['departments'] : [];
 
-        /** @var $request \Zend\Http\Request */
-        $request = $this->getRequest();
-        if ($request->isPost()) {
-            $form->setData($request->getPost());
-            $tester = $user->getRoles();
-            $currentPassword = $user->getPassword();
-            if ($form->isValid()) {
-
-                if ($form->getData()->getPassword() == '') {
-                    error_log('password from form is empty');
-                }
-
-                $user = $this->getAdminUserService()->edit($form, (array) $request->getPost(), $user, $currentPassword);
-                if ($user) {
-                    $this->flashMessenger()->addMessage('The user was edited');
-
-                    return $this->redirect()->toRoute('client');
-                }
-            }
-        } else {
-            $form->populateFromUser($user);
+        if ($this->emailExists($newEmail)) {
+            $s = 'Email address already exists';
+            $response->setStatusCode(409);
+            $response->setContent($s);
+            return $response;
+        }
+        if (!count($departments)) {
+            $s = 'No departments selected';
+            $response->setStatusCode(400);
+            $response->setContent($s);
+            return $response;
         }
 
-        return array(
-            'editUserForm' => $form,
-            'userId' => $userId,
-            'createddate' => $user->getCreatedDate(),
-            'modifieddate' => $user->getModifiedDate(),
-            'lastlogindate' => $user->getLastLoginDate(),
-            'acceptedAgreementDate' => $user->getAcceptedAgreement(),
-        );
+        $result = $this->addUser($newEmail, $departments);
+
+        if (!$result) {
+            $s = 'Error adding user - call support';
+            $response->setStatusCode(503);
+            $response->setContent($s);
+            return $response;
+        }
+        $this->sendInviteEmail($newEmail, $result);
+        $s = 'ok';
+
+        $response->setStatusCode(200);
+        $response->setContent($s);
+        return $response;
     }
     public function emailExists($email) {
         $EntityManager = $this
