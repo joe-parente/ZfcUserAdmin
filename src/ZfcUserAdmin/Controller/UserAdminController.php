@@ -1479,9 +1479,9 @@ class UserAdminController extends AbstractActionController {
     public function sendInviteEmail($email, $id) {
         $message = new Message();
 
-        $message->addFrom('invoices@ezserviceportal.com')
+        $message->addFrom('invoices@ezserviceportal.com', 'EzService Portal')
                 ->addTo($email)
-                ->setSubject('Please complete your registration');
+                ->setSubject('Complete this registration to access your invoices online');
 
         $body = '<p>Please click on the link below to complete your registration on the invoice portal.</p>';
         $body .='<a href="https://einvoice.ezserviceportal.com/user/invited/' . $id . '">Click here</a>';
