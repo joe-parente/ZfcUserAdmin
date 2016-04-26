@@ -1411,6 +1411,8 @@ class UserAdminController extends AbstractActionController {
         $response = $this->getResponse();
         $response->getHeaders()->addHeaderLine('Content-Type', 'text/html');
         $newEmail = $parms['email'];
+        $firstname = $parms['firstname'];
+        $lastname = $parms['lastname'];
         $departments = isset($parms['departments']) ? $parms['departments'] : [];
 
         if ($this->emailExists($newEmail)) {
@@ -1426,7 +1428,7 @@ class UserAdminController extends AbstractActionController {
             return $response;
         }
 
-        $result = $this->addUser($newEmail, $departments);
+        $result = $this->addUser($newEmail, $departments, $firstname, $lastname);
 
         if (!$result) {
             $s = 'Error adding user - call support';
@@ -1451,12 +1453,14 @@ class UserAdminController extends AbstractActionController {
         return $exists;
     }
 
-    public function addUser($email, $departments) {
+    public function addUser($email, $departments, $firstname, $lastname) {
         $EntityManager = $this
                 ->getServiceLocator()
                 ->get('Doctrine\ORM\EntityManager');
         $user = new \Application\Entity\User();
         $user->setEmail($email);
+        $user->setFirstName($firstname);
+        $user->setLastName($lastname);
         $user->setCreateDateTime(new \DateTime());
         foreach ($departments as $dept) {
             $client = $EntityManager
