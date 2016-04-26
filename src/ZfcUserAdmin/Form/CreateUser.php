@@ -176,28 +176,6 @@ class CreateUser extends Register {
                 'id' => 'department_list',
             ],
         ]);
-        $this->add([
-            'type' => 'Zend\Form\Element\Hidden',
-            'name' => 'acceptedagreement',
-            'attributes' => [
-                'value' => '0',
-                'id' => 'acceptedagreement',
-            ],
-        ]);
-//        $this->add(array(
-//            'name' => 'parentclientid',
-//            'type' => 'Application\Form\Element\DtgAutocompleteElement',
-//            'options' => array(
-//                'label' => 'Parent Client',
-//                'sm' => $serviceManager, // don't forget to send Service Manager
-//                'property' => 'parentclientid',
-//            ),
-//            'attributes' => array(
-//                'required' => true,
-//                'class' => 'form-control input-sm',
-//                'style' => 'width: 150px;',
-//            )
-//        ));
         $this->get('submit')->setAttribute('label', 'Create');
         $this->add([
             'name' => 'cancel',
