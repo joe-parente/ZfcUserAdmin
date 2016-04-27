@@ -77,7 +77,19 @@ class EditUser extends Register {
                     ),
                 )
         );
-
+        $this->add(
+                array(
+                    'type' => 'Zend\Form\Element\Checkbox',
+                    'name' => 'emailNotification',
+                    'attributes' => array(
+                        'style' => 'display: inline;',
+                    ),
+                    'options' => array(
+                        'label' => 'Receives Invoice Notification:',
+                        'label_attributes' => ['style="margin-right: 1em']
+                    ),
+                )
+        );
         foreach ($this->getUserEditOptions()->getEditFormElements() as $name => $element) {
             // avoid adding fields twice (e.g. email)
             //if ($this->get($element)) continue;
