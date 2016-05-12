@@ -57,11 +57,25 @@ class EditUser extends Register {
                     ),
                     'options' => array(
                         'label' => 'User role',
-                        'label_attributes' => ['style' => 'margin-top: .3em;' ],
+                        'label_attributes' => ['style' => 'margin-top: .3em;'],
                         'object_manager' => $objectManager,
                         'target_class' => 'Application\Entity\Role',
                         'property' => 'roleId',
                     )
+                )
+        );
+        $this->add(
+                array(
+                    'type' => 'Zend\Form\Element\Checkbox',
+                    'name' => 'masteraccount',
+                    'attributes' => array(
+                        'style' => 'display: inline;',
+                        'id' => 'masteraccount',
+                    ),
+                    'options' => array(
+                        'label' => 'Master Account:',
+                        'label_attributes' => ['style="margin-right: 1em']
+                    ),
                 )
         );
         $this->add(
@@ -166,7 +180,7 @@ class EditUser extends Register {
         }
 
         $this->get('submit')->setLabel('Save')->setValue('Save');
-        
+
         $this->add([
             'name' => 'cancel',
             'type' => 'Zend\Form\Element\Button',

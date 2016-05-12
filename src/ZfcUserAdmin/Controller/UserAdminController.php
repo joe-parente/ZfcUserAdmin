@@ -99,8 +99,8 @@ class UserAdminController extends AbstractActionController {
                 'firstname' => $allUsers[$x]->getFirstName(),
                 'lastname' => $allUsers[$x]->getLastName(),
                 'email' => $allUsers[$x]->getEmail(),
-                'parentclientid' => $allUsers[$x]->getParentClientId(),
-                'parentname' => $allUsers[$x]->getParentName(),
+//                'parentclientid' => $allUsers[$x]->getParentClientId(),
+ //               'parentname' => $allUsers[$x]->getParentName(),
                 'lastlogindatetime' => $allUsers[$x]->getLastLoginDate(),
                 'acceptedagreement' => $allUsers[$x]->getAcceptedAgreement(),
                 'roles' => $allUsers[$x]->getRoles()->getRoleId(),
@@ -155,8 +155,6 @@ class UserAdminController extends AbstractActionController {
         $user = $this->getUserMapper()->findById($userId);
         $this->_session = new Container($this->_namespace);
         $this->_session['user'] = $user->getId();
-
-
 
         /** @var $form \ZfcUserAdmin\Form\EditUser */
         $form = $this->getServiceLocator()->get('zfcuseradmin_edituser_form');

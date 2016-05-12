@@ -95,63 +95,56 @@ class CreateUser extends Register {
                 );
             }
 
-            $this->add(array(
-                'name' => $element,
+            $this->add(['name' => $element,
                 'options' => array(
                     'label' => $name,
                 ),
                 'attributes' => array(
                     'type' => 'text'
                 ),
-            ));
+            ]);
         }
 
-        $this->add(
-                array(
-                    'type' => 'DoctrineORMModule\Form\Element\EntityRadio',
-                    'name' => 'roles',
-                    'attributes' => array(
-                        'multiple' => false,
-                        'style' => 'margin: .5em;',
-                    ),
-                    'options' => array(
-                        'object_manager' => $objectManager,
-                        'target_class' => 'Application\Entity\Role',
-                        'property' => 'roleId',
-                        'label' => 'User Role:',
-                        'label_attributes' => ['style' => 'margin-top: 0.7em'],
-                    )
-                )
+        $this->add([
+            'type' => 'DoctrineORMModule\Form\Element\EntityRadio',
+            'name' => 'roles',
+            'attributes' => array(
+                'multiple' => false,
+                'style' => 'margin: .5em;',
+            ),
+            'options' => array(
+                'object_manager' => $objectManager,
+                'target_class' => 'Application\Entity\Role',
+                'property' => 'roleId',
+                'label' => 'User Role:',
+                'label_attributes' => ['style' => 'margin-top: 0.7em'],
+            )
+                ]
         );
         $this->add(
-                array(
-                    'type' => 'Zend\Form\Element\Checkbox',
-                    'name' => 'state',
+                ['type' => 'Zend\Form\Element\Checkbox',
+                    'name' => 'masteraccount',
                     'attributes' => array(
-                        'style' => 'display: block; margin-bottom: 1.0em;',
+                        'style' => 'display: inline;',
+                         'id' => 'masteraccount',
                     ),
                     'options' => array(
-                        'label' => 'Suspended:',
+                        'label' => 'Master Account:',
+                        'label_attributes' => ['style="margin-right: 1em']
                     ),
-                )
+                ]
         );
-//        $this->add(
-//                array(
-//                    'type' => 'DoctrineModule\Form\Element\ObjectSelect',
-//                    'name' => 'name',
-//                    'options' => array(
-//                        'object_manager' => $objectManager,
-//                        'target_class' => 'Application\Entity\Regionxref',
-//                        'property' => 'r5wRegionname',
-//                        'label' => 'Region',
-//                        'display_empty_item' => true,
-//                        'empty_item_label' => 'Select Region'
-//                    ),
-//                    'attributes' => [
-//                        'onChange' => 'loadParentGrid($(this).val());',
-//                    ],
-//                )
-//        );
+        $this->add([
+            'type' => 'Zend\Form\Element\Checkbox',
+            'name' => 'state',
+            'attributes' => array(
+                'style' => 'display: block; margin-bottom: 1.0em;',
+            ),
+            'options' => array(
+                'label' => 'Suspended:',
+            ),
+                ]
+        );
         $this->add([
             'type' => 'Zend\Form\Element\Hidden',
             'name' => 'region_list',
