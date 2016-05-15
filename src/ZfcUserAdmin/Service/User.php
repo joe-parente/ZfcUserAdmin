@@ -127,7 +127,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         $user->setParentClientId(explode(',', $data['parent_list']));
 
         $user->removeClients();
-        $clients = ($user->getMasterAccount()) ? array_unique(explode(',', $data['parent_list'])):array_unique(explode(',', $data['department_list']));
+        $newClients = ($user->getMasterAccount()) ? array_unique(explode(',', $data['parent_list'])) : array_unique(explode(',', $data['department_list']));
 
         foreach ($newClients as $client) {
             if ($client == null) {
