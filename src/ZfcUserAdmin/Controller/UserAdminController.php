@@ -765,6 +765,7 @@ class UserAdminController extends AbstractActionController {
             $badDepartments[] = $client->getParent();
         }
         $allDepartments = array_unique($badDepartments);
+        $allDepartments = array_values($allDepartments);
         $count = count($allDepartments);
         $rows = $parms['rows'];
         $total_pages = ceil($count / $rows);
