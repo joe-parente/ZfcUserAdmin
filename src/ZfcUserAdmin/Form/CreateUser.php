@@ -126,11 +126,11 @@ class CreateUser extends Register {
                     'name' => 'masteraccount',
                     'attributes' => array(
                         'style' => 'display: inline;',
-                         'id' => 'masteraccount',
+                        'id' => 'masteraccount',
                     ),
                     'options' => array(
-                        'label' => 'Master Account:',
-                        'label_attributes' => ['style="margin-right: 1em']
+                        'label' => 'Master Account',
+                        'label_attributes' => ['style' => "margin-left: 1em"]
                     ),
                 ]
         );
@@ -138,12 +138,26 @@ class CreateUser extends Register {
             'type' => 'Zend\Form\Element\Checkbox',
             'name' => 'state',
             'attributes' => array(
-                'style' => 'display: block; margin-bottom: 1.0em;',
+                'style' => 'display: inline; margin-bottom: 1.0em;',
             ),
             'options' => array(
-                'label' => 'Suspended:',
+                'label' => 'Suspended',
+                'label_attributes' => ['style' => "margin-left: 1em"]
             ),
                 ]
+        );
+        $this->add(
+                array(
+                    'type' => 'Zend\Form\Element\Checkbox',
+                    'name' => 'emailNotification',
+                    'attributes' => array(
+                        'style' => 'display: inline;',
+                    ),
+                    'options' => array(
+                        'label' => 'Receives Invoice Notification',
+                        'label_attributes' => ['style' => 'margin-left: 1em; display: inline']
+                    ),
+                )
         );
         $this->add([
             'type' => 'Zend\Form\Element\Hidden',

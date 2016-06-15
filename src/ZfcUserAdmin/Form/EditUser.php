@@ -69,12 +69,12 @@ class EditUser extends Register {
                     'type' => 'Zend\Form\Element\Checkbox',
                     'name' => 'masteraccount',
                     'attributes' => array(
-                        'style' => 'display: inline;',
+                        'style' => 'display: inline-block;',
                         'id' => 'masteraccount',
                     ),
                     'options' => array(
-                        'label' => 'Master Account:',
-                        'label_attributes' => ['style="margin-right: 1em']
+                        'label' => 'Master Account',
+                        'label_attributes' => ['style' => "margin-left: 1em; display: inline"]
                     ),
                 )
         );
@@ -86,8 +86,8 @@ class EditUser extends Register {
                         'style' => 'display: inline;',
                     ),
                     'options' => array(
-                        'label' => 'Suspended:',
-                        'label_attributes' => ['style="margin-right: 1em']
+                        'label' => 'Suspended',
+                        'label_attributes' => ['style' => 'margin-left: 1em; dsiplay: inline']
                     ),
                 )
         );
@@ -99,8 +99,8 @@ class EditUser extends Register {
                         'style' => 'display: inline;',
                     ),
                     'options' => array(
-                        'label' => 'Receives Invoice Notification:',
-                        'label_attributes' => ['style="margin-right: 1em']
+                        'label' => 'Receives Invoice Notification',
+                        'label_attributes' => ['style' => 'margin-left: 1em; display: inline']
                     ),
                 )
         );
@@ -179,7 +179,7 @@ class EditUser extends Register {
             ));
         }
 
-        $this->get('submit')->setLabel('Save')->setValue('Save');
+        $this->get('submit')->setLabel('Save & Close')->setValue('Save');
 
         $this->add([
             'name' => 'cancel',
