@@ -104,6 +104,9 @@ class UserAdminController extends AbstractActionController {
                 'lastlogindatetime' => $allUsers[$x]->getLastLoginDate(),
                 'acceptedagreement' => $allUsers[$x]->getAcceptedAgreement(),
                 'roles' => $allUsers[$x]->getRoles()->getRoleId(),
+                'masteraccount' => $allUsers[$x]->getMasterAccount() ? 'Y' : '',
+                'receive_invoice_notifications' => $allUsers[$x]->getEmailNotification() ? 'Y' : '',
+                'issuspended' => $allUsers[$x]->getIsSuspended() ? 'Y' : '',
                 'actions' => $link
             ];
         }
