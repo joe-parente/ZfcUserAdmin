@@ -73,7 +73,7 @@ class EditUser extends Register {
                         'id' => 'masteraccount',
                     ),
                     'options' => array(
-                        'label' => 'Master Account',
+                        'label' => 'Master Account  (Views all and receive notification for all Depts)',
                         'label_attributes' => ['style' => "margin-left: 1em; display: inline"]
                     ),
                 )
