@@ -62,10 +62,10 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
         $userRole = $em->getRepository('Application\Entity\Role')->findOneBy($criteria);
         $user->addRole($userRole);
         $user->setCreateDateTime(new \DateTime);
-                $user->setParentClientId(explode(',', $data['parent_list']));
-        $user->setParentClientId(explode(',', $data['parent_list']));
-        
-        $clients = ($user->getMasterAccount()) ? array_unique(explode(',', $data['parent_list'])):array_unique(explode(',', $data['department_list']));
+
+        $user->setParentClientId($data['parent_list']);
+
+        $clients = ($user->getMasterAccount()) ? array_unique(explode(',', $data['parent_list'])) : array_unique(explode(',', $data['department_list']));
         foreach ($clients as $client) {
             if ($client == null) {
                 continue;
@@ -95,9 +95,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
 //            $setter = $this->getAccessorName($key);
 //            if (method_exists($user, $setter)) call_user_func(array($user, $setter), $value);
 //        }
-        if (isset($data['parentclientid']) && is_array($data['parentclientid'])) {
-            $data['parentclientid'] = $data['parentclientid']['id'];
-        }
+
         $argv = array();
         // then check if admin wants to change user password
         if ($this->getOptions()->getAllowPasswordChange()) {
@@ -124,7 +122,7 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
 
         $user->addRole($userRole);
 
-        $user->setParentClientId(explode(',', $data['parent_list']));
+        $user->setParentClientId($data['parent_list']);
 
         $user->removeClients();
         $newClients = ($user->getMasterAccount()) ? array_unique(explode(',', $data['parent_list'])) : array_unique(explode(',', $data['department_list']));
