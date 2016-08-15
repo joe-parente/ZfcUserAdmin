@@ -126,9 +126,9 @@ class User extends EventProvider implements ServiceManagerAwareInterface {
 
         $user->removeClients();
         $newClients = ($user->getMasterAccount()) ? array_unique(explode(',', $data['parent_list'])) : array_unique(explode(',', $data['department_list']));
-
+// die(var_dump($newClients));
         foreach ($newClients as $client) {
-            if ($client == null) {
+            if ($client == null || $client == 'undefined' || $client == '') {
                 continue;
             }
             $clientObj = $em->getRepository('Application\Entity\Client')->findOneBy(['id' => $client]);
