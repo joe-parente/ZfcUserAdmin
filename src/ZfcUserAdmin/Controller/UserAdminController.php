@@ -74,12 +74,10 @@ class UserAdminController extends AbstractActionController {
         $allUsers = $this->getFilteredUsers($parms);
 
         $count = count($allUsers);
-        $rows = 100; // $parms['rows'];
+        $rows = $parms['rows'];
         $total_pages = ceil($count / $rows);
 
         $start = (($page - 1) * $rows);
-        $rows = 5000;
-
         $jsonData = [];
 
         for ($x = $start; $x < $start + $rows; $x++) {
