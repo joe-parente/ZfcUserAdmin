@@ -110,7 +110,7 @@ class UserAdminController extends AbstractActionController {
         }
         $jsonData['page'] = $page;
         $jsonData['records'] = count($allUsers);
-        $jsonData['total'] = count($allUsers);
+        $jsonData['total'] = $total_pages;
 
         $response = $this->getResponse();
         $response->getHeaders()->addHeaderLine('Content-Type', 'application/json');
